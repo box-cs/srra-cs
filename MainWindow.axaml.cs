@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System;
 using System.Collections.ObjectModel;
-using ScottPlot;
 using DynamicData;
 using System.Collections.Generic;
 
@@ -31,57 +30,7 @@ public partial class MainWindow : Window
             yData = new double[] { 1, 2, 3 }
         };
         graph.ShowGraph();
-        mainWindowVM.RefreshDataGrid();
-    }
-
-    private void SetEventHandlers()
-    {
-        MatchesDataGrid.DoubleTapped += MatchesDataGrid_DoubleTapped;
-        TableMenuItem.Click += TableMenuItem_Click;
-        StatisticsMenuItem.Click += StatisticsMenuItem_Click;
-        ExitMenuItem.Click += ExitMenuItem_Click;
-        OptionsMenuItem.Click += OptionsMenuItem_Click;
-    }
-    private async void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-
-        using var optionsDialog = new OptionsDialog();
-        await (optionsDialog.ShowDialog(this));
-    }
-
-    private void ExitMenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
-    private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        MatchesDataGrid.IsVisible = false;
-        StatisticsGrid.IsVisible = true;
-        StatisticsPlot.IsVisible = true;
-    }
-
-    private void TableMenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        MatchesDataGrid.IsVisible = true;
-        StatisticsGrid.IsVisible = false;
-        StatisticsPlot.IsVisible = false;
-    }
-
-    private void MatchesDataGrid_DoubleTapped(object? sender, RoutedEventArgs e)
-    {
-        // Potentially we can see more statistics for the match ? 
-        // throw new Exception(MatchesDataGrid.SelectedItem.ToString());
-    }
-}
-
-public class MainWindowViewModel
-{
-    public ObservableCollection<Match> Matches { get; set; } = new();
-    public void RefreshDataGrid()
-    {
-        Matches.Clear();
-        List<Match> hardCodedMatches = new() { 
+        mainWindowVM.RefreshDataGrid(new() {
             new Match() {
                 Name = "Fox",
                 APM = "305/205",
@@ -101,7 +50,58 @@ public class MainWindowViewModel
                 Map = "Eclipse",
                 Result = "L",
                 Date = DateTime.Now.ToShortDateString()
-            }};
-        Matches.AddRange(hardCodedMatches);
+            }
+        });
+    }
+
+    private void SetEventHandlers()
+    {
+        MatchesDataGrid.DoubleTapped += MatchesDataGrid_DoubleTapped;
+        TableMenuItem.Click += TableMenuItem_Click;
+        StatisticsMenuItem.Click += StatisticsMenuItem_Click;
+        ExitMenuItem.Click += ExitMenuItem_Click;
+        OptionsMenuItem.Click += OptionsMenuItem_Click;
+    }
+    private async void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        using var optionsDialog = new OptionsDialog();
+        await (optionsDialog.ShowDialog(this));
+    }
+
+    private void ExitMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        DataGridScrollViewer.IsVisible = false;
+        MatchesDataGrid.IsVisible = false;
+        StatisticsGrid.IsVisible = true;
+        StatisticsPlot.IsVisible = true;
+    }
+
+    private void TableMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        DataGridScrollViewer.IsVisible = true;
+        MatchesDataGrid.IsVisible = true;
+        StatisticsGrid.IsVisible = false;
+        StatisticsPlot.IsVisible = false;
+    }
+
+    private void MatchesDataGrid_DoubleTapped(object? sender, RoutedEventArgs e)
+    {
+        // Potentially we can see more statistics for the match ? 
+        // throw new Exception(MatchesDataGrid.SelectedItem.ToString());
+    }
+}
+
+public class MainWindowViewModel
+{
+    public ObservableCollection<Match> Matches { get; set; } = new();
+    public void RefreshDataGrid(List<Match> matches)
+    {
+        Matches.Clear();
+        Matches.AddRange(matches);
     }
 }
