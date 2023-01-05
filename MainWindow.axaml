@@ -1,0 +1,165 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:ScottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="srra.MainWindow"
+        Title="Starcraft Remastered Replay Analyzer"
+		Name="SRRAWindow"
+		>
+	<StackPanel>
+		<Grid RowDefinitions="40,Auto,Auto, Auto">
+			<Rectangle Fill="LightBlue" Grid.Row="0"></Rectangle>
+			<DockPanel Grid.Row="0">
+				<Menu DockPanel.Dock="Top">
+					<MenuItem Header="_Settings">
+						<MenuItem Name="OptionsMenuItem" Header="_Options"/>
+						<Separator/>
+						<MenuItem Name="ExitMenuItem" Header="_Exit"/>
+					</MenuItem>
+					<MenuItem Header="_View">
+						<MenuItem Name="TableMenuItem" Header="_Table"></MenuItem>
+						<Separator/>
+						<MenuItem Name="StatisticsMenuItem" Header="_Statistics"></MenuItem>
+					</MenuItem>
+				</Menu>
+			</DockPanel>
+			<!-- Table-->
+			<DataGrid
+				Name="MatchesDataGrid"
+				Items="{Binding Matches, Mode=TwoWay}"
+				RowBackground="LightBlue"
+				AlternatingRowBackground="LightCyan"
+				CanUserSortColumns="True"
+				CanUserResizeColumns="True"
+				Grid.Row="1"
+				IsReadOnly="True"
+				SelectedItem="HandleChange"
+				IsVisible="True"
+				>
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
+					<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APM}" />
+					<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
+					<DataGridTextColumn Header="Apm" Width="*" Binding="{Binding OpponentApm}" />
+					<DataGridTextColumn Header="MatchUp" Width="*" Binding="{Binding MatchUp}" />
+					<DataGridTextColumn Header="Map" Width="*" Binding="{Binding Map}" />
+					<DataGridTextColumn Header="Result" Width="*" Binding="{Binding Result}" />
+					<DataGridTextColumn Header="Date" Width="*" Binding="{Binding Date}" />
+				</DataGrid.Columns>
+			</DataGrid>
+			<!-- Statistics -->
+			<Grid
+				Name="StatisticsGrid"
+				Grid.Row="1"
+				ColumnDefinitions="20, *, 20"
+				RowDefinitions="*, *, *, *"
+				IsVisible="False"
+				>
+				<Label
+					VerticalContentAlignment="Center"
+					HorizontalContentAlignment="Center"
+					Grid.Row="0"
+					Grid.Column="1"
+					FontWeight="Bold"
+					FontSize="20"
+					>
+					Statistics
+				</Label>
+				<!-- Use Parent Width -->
+				<Rectangle
+					Grid.Row="1"
+					Grid.Column="1"
+					HorizontalAlignment="Stretch"
+					Fill="LightBlue"
+					Height="1"
+					IsVisible="True"
+					/>
+				<Grid
+					Margin="5"
+					Grid.Row="2"
+					Grid.Column="1"
+					RowDefinitions="*,*,*,*"
+					ColumnDefinitions="*,*,*">
+					<TextBlock
+						Grid.Column="0"
+						HorizontalAlignment="Center"
+						Text="TvZ">
+					</TextBlock>
+					<TextBlock
+						Grid.Column="1"
+						HorizontalAlignment="Center"
+						Text="TvT">
+					</TextBlock>
+					<TextBlock
+						Grid.Column="2"
+						HorizontalAlignment="Center"
+						Text="TvP&#x0d;&#x0a;">
+					</TextBlock>
+					<TextBlock
+						Grid.Row="1"
+						Grid.Column="0"
+						HorizontalAlignment="Center"
+						Text="ZvZ">
+					</TextBlock>
+					<TextBlock
+						Grid.Row="1"
+						Grid.Column="1"
+						HorizontalAlignment="Center"
+						Text="ZvT">
+					</TextBlock>
+					<TextBlock
+						Grid.Row="1"
+						Grid.Column="2"
+						HorizontalAlignment="Center"
+						Text="ZvP&#x0d;&#x0a;">
+					</TextBlock>
+					<TextBlock
+						Grid.Row="2"
+						Grid.Column="0"
+						HorizontalAlignment="Center"
+						Text="PvZ">
+					</TextBlock>
+					<TextBlock
+						Grid.Row="2"
+						Grid.Column="1"
+						HorizontalAlignment="Center"
+						Text="PvT">
+					</TextBlock>
+					<TextBlock
+						Grid.Row="2"
+						Grid.Column="2"
+						HorizontalAlignment="Center"
+						Text="PvP&#x0d;&#x0a;">
+					</TextBlock>
+				</Grid>
+
+			</Grid>
+			<ScottPlot:AvaPlot
+				Name="StatisticsPlot"
+				IsEnabled="True" 
+				Height="295" 
+				Width="295"
+				Grid.Row="2"
+				IsVisible="False"
+				/>
+			<Rectangle Fill="LightBlue" Grid.Row="3"></Rectangle>
+			<Label
+				Grid.Row="3"
+				FontWeight="Bold"
+				VerticalContentAlignment="Center"
+				HorizontalContentAlignment="Right">
+				Starcraft Remastered Replay Analyzer
+			</Label>
+			<ProgressBar
+				Name="SRRAProgressBar"
+				Grid.Row="3"
+				Width="30"
+				ShowProgressText="True"
+				IsVisible="False"
+				>
+			</ProgressBar>
+		</Grid>
+	</StackPanel>
+</Window>
