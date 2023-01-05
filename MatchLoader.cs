@@ -1,11 +1,8 @@
-﻿using Avalonia.Controls;
-using Avalonia.Rendering;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace srra
 {
@@ -21,18 +18,26 @@ namespace srra
 
         public async void LoadMatches()
         {
-            var progressBar = _mainWindow.SRRAProgressBar;
-           progressBar.IsVisible = true;
-            var items = Enumerable.Range(0, 100);
-            foreach (var item in items) {
-                var task = await Task.Run(() => {
-                    Task.Delay(150).Wait();
-                    return item;
-                });
-                
-                progressBar.Value = item;
-            }
-            progressBar.IsVisible = false;
+            var replayPath = ConfigurationManager.AppSettings["Replay_Path"];
+            var screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
+
+            if (screpPath is null || replayPath is null) return;
+            var replayPaths = Directory.GetFiles(replayPath, "*.rep", SearchOption.AllDirectories).ToList();
+            var replayReader = new ReplayReader(_mainWindow, screpPath, replayPaths);
+            System.Diagnostics.Trace.WriteLine($"Found {replayPaths.Count} Replays!");
+            await replayReader.ReadReplays();
+            replayReader.replayData.ForEach(rep => {
+                try {
+                    var match = new Match(rep);
+                    match.PrintMatch();
+                    _mainWindowVM.Matches.Add(match);
+                }
+                catch (Exception e) {
+                    System.Diagnostics.Trace.WriteLine(e.Message);
+                    // Ignore
+                }
+            });
+            System.Diagnostics.Trace.WriteLine($"Replay Paths: {replayPaths.Count}, Analyzed Replays: {replayReader.replayData.Count}");
         }
     }
 }

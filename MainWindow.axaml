@@ -9,7 +9,11 @@
 		Name="SRRAWindow"
 		>
 	<StackPanel>
-		<Grid RowDefinitions="40,Auto,Auto, Auto">
+		<Grid 
+			Height="{Binding #SRRAWindow.Bounds.Height}"
+			RowDefinitions="40,*,40" 
+			ShowGridLines="True" 
+			>
 			<Rectangle Fill="LightBlue" Grid.Row="0"></Rectangle>
 			<DockPanel Grid.Row="0">
 				<Menu DockPanel.Dock="Top">
@@ -26,35 +30,39 @@
 				</Menu>
 			</DockPanel>
 			<!-- Table-->
-			<DataGrid
-				Name="MatchesDataGrid"
-				Items="{Binding Matches, Mode=TwoWay}"
-				RowBackground="LightBlue"
-				AlternatingRowBackground="LightCyan"
-				CanUserSortColumns="True"
-				CanUserResizeColumns="True"
-				Grid.Row="1"
-				IsReadOnly="True"
-				SelectedItem="HandleChange"
-				IsVisible="True"
+			<ScrollViewer 
+				Name="DataGridScrollViewer"
+				Grid.Row="1" 
 				>
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
-					<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APM}" />
-					<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
-					<DataGridTextColumn Header="Apm" Width="*" Binding="{Binding OpponentApm}" />
-					<DataGridTextColumn Header="MatchUp" Width="*" Binding="{Binding MatchUp}" />
-					<DataGridTextColumn Header="Map" Width="*" Binding="{Binding Map}" />
-					<DataGridTextColumn Header="Result" Width="*" Binding="{Binding Result}" />
-					<DataGridTextColumn Header="Date" Width="*" Binding="{Binding Date}" />
-				</DataGrid.Columns>
-			</DataGrid>
+				<DataGrid
+					Name="MatchesDataGrid"
+					Items="{Binding Matches}"
+					RowBackground="LightBlue"
+					AlternatingRowBackground="LightCyan"
+					CanUserSortColumns="True"
+					CanUserResizeColumns="True"
+					IsReadOnly="True"
+					IsVisible="True"
+					ScrollViewer.VerticalScrollBarVisibility="Visible"
+					>
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
+						<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APM}" />
+						<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
+						<DataGridTextColumn Header="Apm" Width="*" Binding="{Binding OpponentApm}" />
+						<DataGridTextColumn Header="MatchUp" Width="*" Binding="{Binding MatchUp}" />
+						<DataGridTextColumn Header="Map" Width="*" Binding="{Binding Map}" />
+						<DataGridTextColumn Header="Result" Width="*" Binding="{Binding Result}" />
+						<DataGridTextColumn Header="Date" Width="*" Binding="{Binding Date}" />
+					</DataGrid.Columns>
+				</DataGrid>
+			</ScrollViewer>
 			<!-- Statistics -->
 			<Grid
 				Name="StatisticsGrid"
 				Grid.Row="1"
 				ColumnDefinitions="20, *, 20"
-				RowDefinitions="*, *, *, *"
+				RowDefinitions="40, 0, 85, 35, *, 40"
 				IsVisible="False"
 				>
 				<Label
@@ -77,73 +85,82 @@
 					IsVisible="True"
 					/>
 				<Grid
+					IsVisible="True"
 					Margin="5"
 					Grid.Row="2"
 					Grid.Column="1"
 					RowDefinitions="*,*,*,*"
-					ColumnDefinitions="*,*,*">
-					<TextBlock
-						Grid.Column="0"
-						HorizontalAlignment="Center"
-						Text="TvZ">
-					</TextBlock>
+					ColumnDefinitions="50,*,*,*,50">
 					<TextBlock
 						Grid.Column="1"
 						HorizontalAlignment="Center"
-						Text="TvT">
+						VerticalAlignment="Center"
+						Text="TvZ">
 					</TextBlock>
 					<TextBlock
 						Grid.Column="2"
 						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Text="TvT">
+					</TextBlock>
+					<TextBlock
+						Grid.Column="3"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
 						Text="TvP&#x0d;&#x0a;">
 					</TextBlock>
 					<TextBlock
 						Grid.Row="1"
-						Grid.Column="0"
+						Grid.Column="1"
 						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
 						Text="ZvZ">
 					</TextBlock>
 					<TextBlock
 						Grid.Row="1"
-						Grid.Column="1"
+						Grid.Column="2"
 						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
 						Text="ZvT">
 					</TextBlock>
 					<TextBlock
 						Grid.Row="1"
-						Grid.Column="2"
+						Grid.Column="3"
 						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
 						Text="ZvP&#x0d;&#x0a;">
-					</TextBlock>
-					<TextBlock
-						Grid.Row="2"
-						Grid.Column="0"
-						HorizontalAlignment="Center"
-						Text="PvZ">
 					</TextBlock>
 					<TextBlock
 						Grid.Row="2"
 						Grid.Column="1"
 						HorizontalAlignment="Center"
-						Text="PvT">
+						VerticalAlignment="Center"
+						Text="PvZ">
 					</TextBlock>
 					<TextBlock
 						Grid.Row="2"
 						Grid.Column="2"
 						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Text="PvT">
+					</TextBlock>
+					<TextBlock
+						Grid.Row="2"
+						Grid.Column="3"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
 						Text="PvP&#x0d;&#x0a;">
 					</TextBlock>
 				</Grid>
-
+				<ScottPlot:AvaPlot
+					Name="StatisticsPlot"
+					IsEnabled="True"
+					Grid.Row="4"
+					Grid.Column="1"
+					Width="{Binding #StatisticsPlot.Bounds.Height}"
+					IsVisible="False"
+					/>
 			</Grid>
-			<ScottPlot:AvaPlot
-				Name="StatisticsPlot"
-				IsEnabled="True" 
-				Height="295" 
-				Width="295"
-				Grid.Row="2"
-				IsVisible="False"
-				/>
 			<Rectangle Fill="LightBlue" Grid.Row="3"></Rectangle>
 			<Label
 				Grid.Row="3"
