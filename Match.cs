@@ -20,7 +20,7 @@ namespace srra
         public DateTime? Date { get; set; }
         public string? MatchType { get; set; }
         public GameType MatchTypeId { get; set; }
-        public string? Winner { get; set; }
+        public int? WinnerTeam { get; set; }
         public List<Player> Players = new();
         public Dictionary<string, JsonElement>? MatchDictionary;
         public bool IsLadderMatch { get => MatchTypeId == GameType.TopVsBottom; }
@@ -36,18 +36,17 @@ namespace srra
             var matchPlayerDescs = MatchDictionary["Computed"].GetNestedJsonObject()?["PlayerDescs"];
             var matchPlayers = MatchDictionary["Header"].GetNestedJsonObject()?["Players"];
             Players = ExtractPlayers(matchPlayers, matchPlayerDescs);
-            // Bug -- I tried to be fancy, by it seems like we'll have to match by name first ..
             var opponent = Players?.Find(p => p.Name != playerName);
             var player = Players?.Find(p => p.ID != opponent?.ID);
             // Match Data
             MatchUp = $"{GetRaceAlias(player?.Race)}v{GetRaceAlias(opponent?.Race)}";
             ExtractMatchData();
-            int? winnerTeamID = MatchDictionary["Computed"].GetNestedJsonObject()?["WinnerTeam"].GetInt32();
+            WinnerTeam = MatchDictionary["Computed"].GetNestedJsonObject()?["WinnerTeam"].GetInt32();
 
-            Name = $"{player?.Name} {((player?.TeamID == winnerTeamID) ? "👑" : "☠")}";
+            Name = $"{player?.Name} {((player?.TeamID == WinnerTeam) ? "👑" : "☠")}";
             APMString = $"{player?.APM}/{player?.EAPM}";
 
-            OpponentName = $"{opponent?.Name} {((opponent?.TeamID == winnerTeamID) ? "👑" : "☠")}";
+            OpponentName = $"{opponent?.Name} {((opponent?.TeamID == WinnerTeam) ? "👑" : "☠")}";
             OpponentAPMString = $"{opponent?.APM}/{opponent?.EAPM}";
         }
 
@@ -88,17 +87,7 @@ namespace srra
             };
         }
 
-        private static string? GetRaceAlias(string? race)
-        {
-            var raceAlias = new Dictionary<string, string>() {
-                { "Terran" , "T"},
-                { "Protoss" , "P"},
-                { "Zerg" , "Z"},
-            };
-            if (race is not null && raceAlias.TryGetValue(race, out var value))
-                return value;
-            return raceAlias.Values.ToList().Find(k => k == race) ?? race;
-        }
+        public static string GetRaceAlias(string? race) => race?[..1] ?? "";
 
         public override string ToString()
         {
