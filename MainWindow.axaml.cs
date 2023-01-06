@@ -3,52 +3,33 @@ using Avalonia.Interactivity;
 using System.Collections.ObjectModel;
 using DynamicData;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Threading.Tasks;
-using ReactiveUI;
+using System;
+using System.Diagnostics;
 
 namespace srra;
 
 public partial class MainWindow : Window
 {
-    MainWindowViewModel _mainWindowViewModel;
+    readonly MainWindowViewModel _mainWindowViewModel;
     public MainWindow()
     {
         InitializeComponent();
         _mainWindowViewModel = new MainWindowViewModel();
         DataContext = _mainWindowViewModel;
         SetEventHandlers();
-        var matchLoader = new MatchLoader(this, _mainWindowViewModel);
-        matchLoader.LoadMatches();
+        ProcessData();
     }
 
-    public void ShowGraphData()
+    public async void ProcessData()
     {
-        return; // Bugged for now
-        var xData = new double[] { 1, 2, 3 };
-        var yData = new double[] { 1, 2, 3 };
-        var playerName = ConfigurationManager.AppSettings["PlayerName"];
-        List<double> apmResults = new List<double>();
+        var matches = await MatchLoader.LoadMatches();
+        var replayReader = new ReplayReader(this, _mainWindowViewModel, matches);
+        await replayReader.ReadReplays();
+    }
 
-        if (playerName is not null) {
-            foreach (var match in _mainWindowViewModel.Matches) {
-                var player = match.Players.Find(player => player.Name == playerName)!;
-                if (double.TryParse(player.APM.ToString(), out var apmResult)){ 
-                    apmResults.Add(apmResult);
-                }
-            }
-            var data =  Enumerable.Range(0, apmResults.Count).Select(x => (double)x).ToList();
-            xData = data.ToArray();
-            yData = apmResults.ToArray();
-        }
-
-        var graph = new Graph(StatisticsPlot, "APM Graph!!") {
-            xData = xData,
-            yData = yData,
-        };
-
-        graph.ShowGraph();
+    public void ShowGraphData(List<Match> replayData)
+    {
+        throw new NotImplementedException();
     }
 
     private void SetEventHandlers()
@@ -59,6 +40,7 @@ public partial class MainWindow : Window
         ExitMenuItem.Click += ExitMenuItem_Click;
         OptionsMenuItem.Click += OptionsMenuItem_Click;
     }
+
     private async void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         using var optionsDialog = new OptionsDialog();
@@ -69,6 +51,7 @@ public partial class MainWindow : Window
     {
         Close();
     }
+
     private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         DataGridScrollViewer.IsVisible = false;
@@ -84,11 +67,10 @@ public partial class MainWindow : Window
         StatisticsGrid.IsVisible = false;
         StatisticsPlot.IsVisible = false;
     }
-
     private void MatchesDataGrid_DoubleTapped(object? sender, RoutedEventArgs e)
     {
-        // Potentially we can see more statistics for the match ? 
-        // throw new Exception(MatchesDataGrid.SelectedItem.ToString());
+        if (MatchesDataGrid.SelectedItem is Match match) 
+            match.OpenReplayFolder();
     }
 }
 
