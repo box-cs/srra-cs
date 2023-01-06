@@ -29,32 +29,27 @@
 				</Menu>
 			</DockPanel>
 			<!-- Table-->
-			<ScrollViewer 
-				Name="DataGridScrollViewer"
-				Grid.Row="1" 
+			<DataGrid
+				Name="MatchesDataGrid"
+				Items="{Binding Matches}"
+				RowBackground="LightBlue"
+				AlternatingRowBackground="LightCyan"
+				CanUserSortColumns="True"
+				CanUserResizeColumns="True"
+				IsReadOnly="True"
+				IsVisible="True"
+				Grid.Row="1"
 				>
-				<DataGrid
-					Name="MatchesDataGrid"
-					Items="{Binding Matches}"
-					RowBackground="LightBlue"
-					AlternatingRowBackground="LightCyan"
-					CanUserSortColumns="True"
-					CanUserResizeColumns="True"
-					IsReadOnly="True"
-					IsVisible="True"
-					ScrollViewer.VerticalScrollBarVisibility="Visible"
-					>
-					<DataGrid.Columns>
-						<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
-						<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APMString}" />
-						<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
-						<DataGridTextColumn Header="APM/EAPM" Width="*" Binding="{Binding OpponentAPMString}" />
-						<DataGridTextColumn Header="MatchUp" Width="*" Binding="{Binding MatchUp}" />
-						<DataGridTextColumn Header="Map" Width="*" Binding="{Binding Map}" />
-						<DataGridTextColumn Header="Date" Width="*" Binding="{Binding Date}" />
-					</DataGrid.Columns>
-				</DataGrid>
-			</ScrollViewer>
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
+					<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APMString}" />
+					<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
+					<DataGridTextColumn Header="APM/EAPM" Width="*" Binding="{Binding OpponentAPMString}" />
+					<DataGridTextColumn Header="MatchUp" Width="*" Binding="{Binding MatchUp}" />
+					<DataGridTextColumn Header="Map" Width="*" Binding="{Binding Map}" />
+					<DataGridTextColumn Header="Date" Width="*" Binding="{Binding Date}" />
+				</DataGrid.Columns>
+			</DataGrid>
 			<!-- Statistics -->
 			<Grid
 				Name="StatisticsGrid"
