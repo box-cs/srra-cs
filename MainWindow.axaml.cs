@@ -14,6 +14,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        UpdateStatisticsTabVisibility(false);
         _mainWindowViewModel = new MainWindowViewModel();
         _analyzer = new Analyzer(this, _mainWindowViewModel);
         DataContext = _mainWindowViewModel;
@@ -31,6 +32,7 @@ public partial class MainWindow : Window
         await replayReader.ReadReplays();
         _analyzer.UpdateGraphData();
         _analyzer.AnalyzeReplays(new List<Match>(replayReader.replayData));
+        _analyzer.IsDoneAnalyzing = true;
     }
 
     private void SetEventHandlers()
@@ -52,26 +54,32 @@ public partial class MainWindow : Window
 
     private async void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        if (_mainWindowViewModel.IsPlayerNameSet || !string.IsNullOrEmpty(ConfigurationManager.AppSettings["PlayerName"])) {
+        if (_mainWindowViewModel.IsPlayerNameSet || 
+            !string.IsNullOrEmpty(ConfigurationManager.AppSettings["PlayerName"]) &&
+             _analyzer.IsDoneAnalyzing) {
             MatchesDataGrid.IsVisible = false;
-            StatisticsGrid.IsVisible = true;
-            StatisticsPlot.IsVisible = true;
+            UpdateStatisticsTabVisibility(true);
             return;
         }
-        var messageBox = new MessageBox("Set a player name!", "Ok");
+        var messageBox = new MessageBox(_analyzer.IsDoneAnalyzing ? "Set a player name!" : "Wait for analyzer!", "Ok");
         await(messageBox.ShowDialog(this));
     }
 
     private void TableMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         MatchesDataGrid.IsVisible = true;
-        StatisticsGrid.IsVisible = false;
-        StatisticsPlot.IsVisible = false;
+        UpdateStatisticsTabVisibility(false);
     }
     private void MatchesDataGrid_DoubleTapped(object? sender, RoutedEventArgs e)
     {
         if (MatchesDataGrid.SelectedItem is Match match) 
             match.OpenReplayFolder();
+    }
+
+    private void UpdateStatisticsTabVisibility(bool isVisible)
+    {
+        StatisticsGrid.IsVisible = isVisible;
+        StatisticsPlot.IsVisible = isVisible;
     }
 }
 
