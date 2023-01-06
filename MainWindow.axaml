@@ -68,7 +68,6 @@
 					>
 					Statistics
 				</Label>
-				<!-- Use Parent Width -->
 				<Rectangle
 					Grid.Row="1"
 					Grid.Column="1"
@@ -78,72 +77,13 @@
 					IsVisible="True"
 					/>
 				<Grid
+					Name="WinRatesGrid"
 					IsVisible="True"
 					Margin="5"
 					Grid.Row="2"
 					Grid.Column="1"
 					RowDefinitions="*,*,*,*"
 					ColumnDefinitions="50,*,*,*,50">
-					<TextBlock
-						Grid.Column="1"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="TvZ">
-					</TextBlock>
-					<TextBlock
-						Grid.Column="2"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="TvT">
-					</TextBlock>
-					<TextBlock
-						Grid.Column="3"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="TvP&#x0d;&#x0a;">
-					</TextBlock>
-					<TextBlock
-						Grid.Row="1"
-						Grid.Column="1"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="ZvZ">
-					</TextBlock>
-					<TextBlock
-						Grid.Row="1"
-						Grid.Column="2"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="ZvT">
-					</TextBlock>
-					<TextBlock
-						Grid.Row="1"
-						Grid.Column="3"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="ZvP&#x0d;&#x0a;">
-					</TextBlock>
-					<TextBlock
-						Grid.Row="2"
-						Grid.Column="1"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="PvZ">
-					</TextBlock>
-					<TextBlock
-						Grid.Row="2"
-						Grid.Column="2"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="PvT">
-					</TextBlock>
-					<TextBlock
-						Grid.Row="2"
-						Grid.Column="3"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						Text="PvP&#x0d;&#x0a;">
-					</TextBlock>
 				</Grid>
 				<ScottPlot:AvaPlot
 					Name="StatisticsPlot"
