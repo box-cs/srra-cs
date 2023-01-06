@@ -18,7 +18,7 @@ public partial class MainWindow : Window
         _analyzer = new Analyzer(this, _mainWindowViewModel);
         DataContext = _mainWindowViewModel;
         var playerName = ConfigurationManager.AppSettings["PlayerName"];
-        if (playerName is null)
+        if (string.IsNullOrEmpty(playerName))
             _mainWindowViewModel.IsPlayerNameSet = false;
         SetEventHandlers();
         ProcessData();
@@ -52,8 +52,7 @@ public partial class MainWindow : Window
 
     private async void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        if (_mainWindowViewModel.IsPlayerNameSet || ConfigurationManager.AppSettings["PlayerName"] != "" ) {
-            Title = $"{ConfigurationManager.AppSettings["PlayerName"]}";
+        if (_mainWindowViewModel.IsPlayerNameSet || !string.IsNullOrEmpty(ConfigurationManager.AppSettings["PlayerName"])) {
             MatchesDataGrid.IsVisible = false;
             StatisticsGrid.IsVisible = true;
             StatisticsPlot.IsVisible = true;

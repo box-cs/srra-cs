@@ -8,7 +8,7 @@
         public int? APM;
         public int? EAPM;
         public string? Race;
-        public Player(int? id, int? teamId, string? name, int? apm, int? eapm, string? race)
+         public Player(int? id, int? teamId, string? name, int? apm, int? eapm, string? race)
         {
             ID = id;
             TeamID = teamId;

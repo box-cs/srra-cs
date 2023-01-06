@@ -27,10 +27,11 @@ public class ReplayReader
     public async Task ReadReplay(string replayPath)
     {
         string? _screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
-        if (_screpPath is null || _replayPaths?.Count == 0) return;
+        if (string.IsNullOrEmpty(_screpPath) || _replayPaths?.Count == 0) return;
         try {
             var data = await ReadFromSCREP(_screpPath, replayPath);
-            if (data is null) return;
+            if (string.IsNullOrEmpty(data)) return;
+
             var match = new Match(data, replayPath);
             if (match.IsLadderMatch) {
                 _mainWindowVM.Matches.Add(match);

@@ -8,8 +8,8 @@ namespace srra;
 
 public class Analyzer
 {
-    MainWindow _mainWindow;
-    MainWindowViewModel _mainWindowViewModel;
+    readonly MainWindow _mainWindow;
+    readonly MainWindowViewModel _mainWindowViewModel;
     public WinRates? WinRates;
 
     public Analyzer(MainWindow mainWindow, MainWindowViewModel mainWindowViewModel)
@@ -38,8 +38,7 @@ public class Analyzer
     public void FindWinRatios(List<Match> matches)
     {
         var playerName = ConfigurationManager.AppSettings["PlayerName"];
-        if (playerName is null)
-            return;
+        if (string.IsNullOrEmpty(playerName)) return;
 
         WinRates = new WinRates();
         matches.ForEach(match => {
@@ -74,6 +73,8 @@ public class Analyzer
     {
         var apmResults = new List<int?>();
         var playerName = ConfigurationManager.AppSettings["PlayerName"];
+        if (string.IsNullOrEmpty(playerName)) return apmResults;
+
         foreach (var match in _mainWindowViewModel.Matches) {
             var player = match?.Players?.Find(player => player.Name == playerName);
             if (player is null) continue;
