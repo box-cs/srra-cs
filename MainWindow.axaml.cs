@@ -29,7 +29,8 @@ public partial class MainWindow : Window
         var matches = await MatchLoader.LoadMatches();
         var replayReader = new ReplayReader(this, _mainWindowViewModel, matches);
         await replayReader.ReadReplays();
-        _analyzer.ShowGraphData();
+        _analyzer.UpdateGraphData();
+        _analyzer.AnalyzeReplays(new List<Match>(replayReader.replayData));
     }
 
     private void SetEventHandlers()
@@ -79,6 +80,8 @@ public class MainWindowViewModel
 {
     public ObservableCollection<Match> Matches { get; set; } = new();
     public bool IsPlayerNameSet { get; set; }
+    public WinRates WinRates = new WinRates();
+
     public void RefreshDataGrid(List<Match> matches)
     {
         Matches.Clear();
