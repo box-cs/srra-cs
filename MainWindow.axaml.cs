@@ -3,8 +3,8 @@ using Avalonia.Interactivity;
 using System.Collections.ObjectModel;
 using DynamicData;
 using System.Collections.Generic;
-using System;
-using System.Diagnostics;
+using System.Configuration;
+using System.Linq;
 
 namespace srra;
 
@@ -25,11 +25,30 @@ public partial class MainWindow : Window
         var matches = await MatchLoader.LoadMatches();
         var replayReader = new ReplayReader(this, _mainWindowViewModel, matches);
         await replayReader.ReadReplays();
+        ShowGraphData();
     }
 
-    public void ShowGraphData(List<Match> replayData)
+    private void ShowGraphData()
     {
-        throw new NotImplementedException();
+        var apmResults = GetAPMResults();
+        var xData = Enumerable.Range(0, apmResults.Count).Select(x=>(double)x).ToArray();
+        var graph = new Graph(StatisticsPlot, "APM Graph") {
+            xData = xData,
+            yData = apmResults.Select(x => (double?)x ?? 0.0).ToArray()
+        };
+        graph.ShowGraph();
+    }
+
+    private List<int?> GetAPMResults()
+    {
+        var apmResults = new List<int?>();
+        var playerName = ConfigurationManager.AppSettings["PlayerName"];
+        foreach (var match in _mainWindowViewModel.Matches) {
+            var player = match?.Players?.Find(player => player.Name == playerName);
+            if (player is null) continue;
+            apmResults.Add(player.APM);
+        }
+        return apmResults;
     }
 
     private void SetEventHandlers()
