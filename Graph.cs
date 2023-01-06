@@ -17,7 +17,7 @@ namespace srra
 
         public void ShowGraph()
         {
-            if (xData is null || yData is null) return;
+            if (xData is null || yData is null || xData.Length == 0 || yData.Length == 0) return;
             avaPlot.Plot.Palette = ScottPlot.Palette.Frost;
             avaPlot.Plot.AddScatter(xData, yData);
             avaPlot.Plot.AxisAuto(0, 0.1);
