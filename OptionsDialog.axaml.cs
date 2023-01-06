@@ -4,7 +4,7 @@ using System.Configuration;
 
 namespace srra
 {
-    public partial class OptionsDialog : Window, IDisposable
+    public partial class OptionsDialog : Window
     {
         public OptionsDialog()
         {
@@ -48,11 +48,6 @@ namespace srra
             config.AppSettings.Settings[key].Value = value;
             config.Save(ConfigurationSaveMode.Modified);
             ConfigurationManager.RefreshSection("appSettings");
-        }
-
-        public void Dispose()
-        {
-            Close();
         }
     }
 }

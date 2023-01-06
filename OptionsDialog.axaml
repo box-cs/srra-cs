@@ -6,7 +6,7 @@
 		Height="180"
 		Width="300"
         x:Class="srra.OptionsDialog"
-        Title="OptionsDialog"
+        Title="Options"
 		CanResize="False">
 	<StackPanel Width="300">
 		<Grid 
