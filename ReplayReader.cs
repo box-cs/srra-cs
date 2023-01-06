@@ -9,18 +9,19 @@ namespace srra;
 
 public class ReplayReader
 {
-    readonly MainWindow _mainWindow;
-    readonly MainWindowViewModel _mainWindowVM;
     public List<Match> replayData = new();
     public List<Thread> processingThreads = new();
+    readonly MainWindow _mainWindow;
+    readonly MainWindowViewModel _mainWindowVM;
     private readonly List<string>? _replayPaths;
-    private byte count = 0;
+    private int _count;
 
     public ReplayReader(MainWindow mainWindow, MainWindowViewModel mainWindowVM, List<string> replayPaths)
     {
         _mainWindow = mainWindow;
         _mainWindowVM = mainWindowVM;   
         _replayPaths = replayPaths;
+        _count = 0;
     }
 
     public async Task ReadReplay(string replayPath)
@@ -69,11 +70,12 @@ public class ReplayReader
     private void UpdateProgressBar()
     {
         if (_replayPaths == null) return;
-        if (count == 0)
+
+        if (_count == 0) 
             (new Action(() => _mainWindow.SRRAProgressBar.IsVisible = true)).Invoke();
-        if (count == _replayPaths.Count - 1)
+        if (_count == _replayPaths.Count - 1)
             (new Action(() => _mainWindow.SRRAProgressBar.IsVisible = false)).Invoke();
 
-        new Action(() => _mainWindow.SRRAProgressBar.Value = (++count * 100) / _replayPaths.Count).Invoke();
+        new Action(() => _mainWindow.SRRAProgressBar.Value = (++_count * 100) / _replayPaths.Count).Invoke();
     }
 }
