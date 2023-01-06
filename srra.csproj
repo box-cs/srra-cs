@@ -26,4 +26,10 @@
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
 	  <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="MessageBox.axaml.cs">
+      <DependentUpon>MessageBox.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>
