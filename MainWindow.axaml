@@ -5,14 +5,13 @@
 		xmlns:ScottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="srra.MainWindow"
-        Title="Starcraft Remastered Replay Analyzer"
+        Title="SRRA"
 		Name="SRRAWindow"
 		>
 	<StackPanel>
 		<Grid 
 			Height="{Binding #SRRAWindow.Bounds.Height}"
 			RowDefinitions="40,*,40" 
-			ShowGridLines="True" 
 			>
 			<Rectangle Fill="LightBlue" Grid.Row="0"></Rectangle>
 			<DockPanel Grid.Row="0">
@@ -47,12 +46,11 @@
 					>
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
-						<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APM}" />
+						<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APMString}" />
 						<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
-						<DataGridTextColumn Header="Apm" Width="*" Binding="{Binding OpponentApm}" />
+						<DataGridTextColumn Header="APM/EAPM" Width="*" Binding="{Binding OpponentAPMString}" />
 						<DataGridTextColumn Header="MatchUp" Width="*" Binding="{Binding MatchUp}" />
 						<DataGridTextColumn Header="Map" Width="*" Binding="{Binding Map}" />
-						<DataGridTextColumn Header="Result" Width="*" Binding="{Binding Result}" />
 						<DataGridTextColumn Header="Date" Width="*" Binding="{Binding Date}" />
 					</DataGrid.Columns>
 				</DataGrid>
