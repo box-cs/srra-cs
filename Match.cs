@@ -61,7 +61,8 @@ namespace srra
             MatchTypeId = (GameType)(MatchDictionary["Header"]
                 .GetNestedJsonObject()?["Type"]
                 .GetNestedJsonObject()?["ID"].GetInt32() ?? (int)GameType.Unkown);
-            Map = MatchDictionary["Header"].GetNestedJsonObject()?["Map"].ToString();
+            var map = MatchDictionary["Header"].GetNestedJsonObject()?["Map"].ToString() ?? "";
+            Map = new string(map.ToList().FindAll(c=>(char.IsLetterOrDigit(c)) || char.IsWhiteSpace(c) || char.IsPunctuation(c)).ToArray());
         }
 
         private static List<Player> ExtractPlayers(JsonElement? matchPlayers, JsonElement? matchPlayerDescs)
