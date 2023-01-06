@@ -1,57 +1,54 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using System;
 using System.Collections.ObjectModel;
 using DynamicData;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace srra;
 
-
 public partial class MainWindow : Window
 {
+    MainWindowViewModel _mainWindowViewModel;
     public MainWindow()
     {
         InitializeComponent();
-        var mainWindowViewModel = new MainWindowViewModel();
-        DataContext = mainWindowViewModel;
-        var matchLoader = new MatchLoader(this, mainWindowViewModel);
-        matchLoader.LoadMatches();
+        _mainWindowViewModel = new MainWindowViewModel();
+        DataContext = _mainWindowViewModel;
         SetEventHandlers();
-        // Find a way to resize the entire window dynamically
-        MatchesDataGrid.Height = SRRAWindow.Height - 80;
-        ShowGraphData(mainWindowViewModel);
+        var matchLoader = new MatchLoader(this, _mainWindowViewModel);
+        matchLoader.LoadMatches();
     }
 
-    private void ShowGraphData(MainWindowViewModel mainWindowVM)
+    public void ShowGraphData()
     {
-        var graph = new Graph(StatisticsPlot, "APM Graph") {
-            xData = new double[] { 1, 2, 3 },
-            yData = new double[] { 1, 2, 3 }
-        };
-        graph.ShowGraph();
-        mainWindowVM.RefreshDataGrid(new() {
-            new Match() {
-                Name = "Fox",
-                APM = "305/205",
-                OpponentName = "jinjin5000",
-                OpponentApm = "278, 203",
-                MatchUp = "TvT",
-                Map = "Polypoid",
-                Result = "L",
-                Date = DateTime.Now.ToShortDateString()
-            },
-            new Match() {
-                Name = "Flash",
-                APM = "423/305",
-                OpponentName = "Jaedong",
-                OpponentApm = "410, 296",
-                MatchUp = "TvZ",
-                Map = "Eclipse",
-                Result = "L",
-                Date = DateTime.Now.ToShortDateString()
+        return; // Bugged for now
+        var xData = new double[] { 1, 2, 3 };
+        var yData = new double[] { 1, 2, 3 };
+        var playerName = ConfigurationManager.AppSettings["PlayerName"];
+        List<double> apmResults = new List<double>();
+
+        if (playerName is not null) {
+            foreach (var match in _mainWindowViewModel.Matches) {
+                var player = match.Players.Find(player => player.Name == playerName)!;
+                if (double.TryParse(player.APM.ToString(), out var apmResult)){ 
+                    apmResults.Add(apmResult);
+                }
             }
-        });
+            var data =  Enumerable.Range(0, apmResults.Count).Select(x => (double)x).ToList();
+            xData = data.ToArray();
+            yData = apmResults.ToArray();
+        }
+
+        var graph = new Graph(StatisticsPlot, "APM Graph!!") {
+            xData = xData,
+            yData = yData,
+        };
+
+        graph.ShowGraph();
     }
 
     private void SetEventHandlers()
@@ -72,7 +69,6 @@ public partial class MainWindow : Window
     {
         Close();
     }
-
     private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         DataGridScrollViewer.IsVisible = false;
