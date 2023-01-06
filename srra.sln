@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "srra", "srra.csproj", "{88A4DCFF-8399-4866-8D6B-9FEA7DB255D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88A4DCFF-8399-4866-8D6B-9FEA7DB255D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88A4DCFF-8399-4866-8D6B-9FEA7DB255D8}.Debug|x64.ActiveCfg = Debug|x64
+		{88A4DCFF-8399-4866-8D6B-9FEA7DB255D8}.Debug|x64.Build.0 = Debug|x64
+		{88A4DCFF-8399-4866-8D6B-9FEA7DB255D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88A4DCFF-8399-4866-8D6B-9FEA7DB255D8}.Release|x64.ActiveCfg = Release|x64
+		{88A4DCFF-8399-4866-8D6B-9FEA7DB255D8}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3288E37A-3355-4546-8B69-C3309B9824A8}
+	EndGlobalSection
+EndGlobal
