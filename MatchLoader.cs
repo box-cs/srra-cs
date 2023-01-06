@@ -36,7 +36,7 @@ namespace srra
                 var screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
 
                 if (screpPath is null || replayPath is null) return new();
-                var matches = Directory.GetFiles(replayPath, "*.rep", SearchOption.TopDirectoryOnly).ToList();
+                var matches = Directory.GetFiles(replayPath, "*.rep", SearchOption.AllDirectories).ToList();
                 matches.Reverse();
                 return matches;
             });
