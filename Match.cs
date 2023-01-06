@@ -17,7 +17,7 @@ namespace srra
         public string? MatchUp { get; set; }
         public string? Map { get; set; }
         public string? Result { get; set; }
-        public string? Date { get; set; }
+        public DateTime? Date { get; set; }
         public string? MatchType { get; set; }
         public GameType MatchTypeId { get; set; }
         public string? Winner { get; set; }
@@ -54,7 +54,7 @@ namespace srra
         private void ExtractMatchData()
         {
             if (MatchDictionary is null) return;
-            Date = MatchDictionary["Header"].GetNestedJsonObject()?["StartTime"].ToString();
+            Date = MatchDictionary["Header"].GetNestedJsonObject()?["StartTime"].GetDateTime();
             MatchType = MatchDictionary["Header"]
                 .GetNestedJsonObject()?["Type"]
                 .GetNestedJsonObject()?["Name"].ToString();
