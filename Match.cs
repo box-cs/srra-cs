@@ -1,58 +1,113 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
+using System.Configuration;
 
 namespace srra
 {
     public class Match
     {
         public string? Name { get; set; }
-        public string? APM { get; set; }
+        public string? APMString { get; set; }
         public string? OpponentName { get; set; }
-        public string? OpponentApm { get; set; }
+        public string? OpponentAPMString { get; set; }
         public string? MatchUp { get; set; }
         public string? Map { get; set; }
         public string? Result { get; set; }
         public string? Date { get; set; }
-        // NOT USED YET
         public string? MatchType { get; set; }
-        public int? MatchTypeId { get; set; }
-        public int? WinnerTeam { get; set; }
+        public GameType MatchTypeId { get; set; }
+        public string? Winner { get; set; }
+        public List<Player> Players = new();
         public Dictionary<string, JsonElement>? MatchDictionary;
+        public bool IsLadderMatch { get {
+                return MatchTypeId == GameType.TopVsBottom;
+            } }
 
         public Match(string match)
         {
             MatchDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(match);
             if (MatchDictionary is null) throw new Exception("Match deserialization failed");
+            // Player Data
+            var playerName = ConfigurationManager.AppSettings["PlayerName"];
+            var matchPlayerDescs = MatchDictionary["Computed"].GetNestedJsonObject()?["PlayerDescs"];
+            var matchPlayers = MatchDictionary["Header"].GetNestedJsonObject()?["Players"];
+            Players = ExtractPlayers(matchPlayers, matchPlayerDescs);
+            // Bug -- I tried to be fancy, by it seems like we'll have to match by name first ..
+            var opponent = Players?.Find(p => p.Name != playerName);
+            var player = Players?.Find(p => p.ID != opponent?.ID);
 
+            // Match Data
+            MatchUp = $"{GetRaceAlias(player?.Race)}v{GetRaceAlias(opponent?.Race)}";
+            ExtractMatchData();
+            int? winnerTeamID = MatchDictionary["Computed"].GetNestedJsonObject()?["WinnerTeam"].GetInt32();
+
+            Name = $"{player?.Name} {((player?.TeamID == winnerTeamID) ? "👑" : "☠")}";
+            APMString = $"{player?.APM}/{player?.EAPM}";
+
+            OpponentName = $"{opponent?.Name} {((opponent?.TeamID == winnerTeamID) ? "👑" : "☠")}";
+            OpponentAPMString = $"{opponent?.APM}/{opponent?.EAPM}";
+        }
+
+        public Match(){}
+        private void ExtractMatchData()
+        {
+            if (MatchDictionary is null) return;
             Date = MatchDictionary["Header"].GetNestedJsonObject()?["StartTime"].ToString();
             MatchType = MatchDictionary["Header"]
                 .GetNestedJsonObject()?["Type"]
                 .GetNestedJsonObject()?["Name"].ToString();
-            MatchTypeId = MatchDictionary["Header"]
+            MatchTypeId = (GameType)(MatchDictionary["Header"]
                 .GetNestedJsonObject()?["Type"]
-                .GetNestedJsonObject()?["ID"].GetInt32();
+                .GetNestedJsonObject()?["ID"].GetInt32() ?? (int)GameType.Unkown);
             Map = MatchDictionary["Header"].GetNestedJsonObject()?["Map"].ToString();
-            WinnerTeam = MatchDictionary["Computed"].GetNestedJsonObject()?["WinnerTeam"].GetInt32();
-            var matchPlayers = MatchDictionary["Header"].GetNestedJsonObject()?["Players"];
-            var matchPlayerDescs = MatchDictionary["Computed"].GetNestedJsonObject()?["PlayerDescs"];
+        }
+        private static List<Player> ExtractPlayers(JsonElement? matchPlayers, JsonElement? matchPlayerDescs)
+        {
+            if (matchPlayerDescs == null || matchPlayers is null) return new();
+            var playerName = matchPlayers.Value[0].GetNestedJsonObject()?["Name"].ToString();
+            var playerId = matchPlayers.Value[0].GetNestedJsonObject()?["ID"].GetInt32();
+            var playerTeamId = matchPlayers.Value[0].GetNestedJsonObject()?["Team"].GetInt32();
+            var playerRace = matchPlayers.Value[0].GetNestedJsonObject()?["Race"].GetNestedJsonObject()?["Name"].ToString();
+            var playerAPM = matchPlayerDescs.Value[0].GetNestedJsonObject()?["APM"].GetInt32();
+            var playerEAPM = matchPlayerDescs.Value[0].GetNestedJsonObject()?["EAPM"].GetInt32();
+
+            var opponentName = matchPlayers.Value[1].GetNestedJsonObject()?["Name"].ToString();
+            var opponentId = matchPlayers.Value[1].GetNestedJsonObject()?["ID"].GetInt32();
+            var opponentTeamId = matchPlayers.Value[1].GetNestedJsonObject()?["Team"].GetInt32();
+            var opponentRace = matchPlayers.Value[1].GetNestedJsonObject()?["Race"].GetNestedJsonObject()?["Name"].ToString();
+            var opponentAPM = matchPlayerDescs.Value[1].GetNestedJsonObject()?["APM"].GetInt32();
+            var opponentEAPM = matchPlayerDescs.Value[1].GetNestedJsonObject()?["EAPM"].GetInt32();
+
+            return new () {
+                new Player(playerId, playerTeamId, playerName, playerAPM, playerEAPM, playerRace),
+                new Player(opponentId, opponentTeamId, opponentName, opponentAPM, opponentEAPM, opponentRace),
+            };
         }
 
-        public Match()
+        private static string? GetRaceAlias(string? race)
         {
-
+            var raceAlias = new Dictionary<string, string>() {
+                { "Terran" , "T"},
+                { "Protoss" , "P"},
+                { "Zerg" , "Z"},
+            };
+            if (race is not null && raceAlias.TryGetValue(race, out var value))
+                return value;
+            return raceAlias.Values.ToList().Find(k => k == race) ?? race;
         }
 
         public override string ToString()
         {
-            return $"{Name}{APM}{OpponentName}{OpponentApm}{MatchUp}{Map}{Result}{Date}";
+            return $"{Name} vs {OpponentName} - {MatchUp} - {Map} - {Result} - {Date}";
         }
 
         internal void PrintMatch()
         {
             if (MatchDictionary == null) return;
-
-            System.Diagnostics.Trace.WriteLine(Date);
+            Trace.WriteLine(ToString());
         }
     }
 }
