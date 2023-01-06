@@ -11,6 +11,14 @@ namespace srra
             InitializeComponent();
             SetSCREPPathButton.Click += SetSCREPPathButton_Click;
             SetReplayPathButton.Click += SetReplayPathButton_Click;
+            SetPlayerName.Click += SetPlayerName_Click;
+        }
+
+        private void SetPlayerName_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            var content = PlayerNameTextBox.Text;
+            if (content is not null)
+                SaveConfig("PlayerName", content);
         }
 
         private void SetSCREPPathButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
