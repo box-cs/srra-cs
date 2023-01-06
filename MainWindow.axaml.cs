@@ -73,7 +73,6 @@ public partial class MainWindow : Window
 
     private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        DataGridScrollViewer.IsVisible = false;
         MatchesDataGrid.IsVisible = false;
         StatisticsGrid.IsVisible = true;
         StatisticsPlot.IsVisible = true;
@@ -81,7 +80,6 @@ public partial class MainWindow : Window
 
     private void TableMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        DataGridScrollViewer.IsVisible = true;
         MatchesDataGrid.IsVisible = true;
         StatisticsGrid.IsVisible = false;
         StatisticsPlot.IsVisible = false;
