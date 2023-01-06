@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace srra
 {
@@ -27,27 +29,17 @@ namespace srra
 
     public class MatchLoader
     {
-        readonly MainWindow _mainWindow;
-        readonly MainWindowViewModel _mainWindowVM;
-        public MatchLoader(MainWindow mainWindow, MainWindowViewModel mainWindowVM)
+        public static async Task<List<string>> LoadMatches()
         {
-            _mainWindow = mainWindow;
-            _mainWindowVM = mainWindowVM;
-        }
+            return await Task.Run(() => {
+                var replayPath = ConfigurationManager.AppSettings["Replay_Path"];
+                var screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
 
-        public async void LoadMatches()
-        {
-            var replayPath = ConfigurationManager.AppSettings["Replay_Path"];
-            var screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
-
-            if (screpPath is null || replayPath is null) return;
-            var replayPaths = Directory.GetFiles(replayPath, "*.rep", SearchOption.AllDirectories).ToList();
-            replayPaths.Reverse(); // Order by latest date
-            var replayReader = new ReplayReader(_mainWindow, _mainWindowVM, screpPath, replayPaths);
-            System.Diagnostics.Trace.WriteLine($"Found {replayPaths.Count} Replays!");
-            await replayReader.ReadReplays();
-            System.Diagnostics.Trace.WriteLine($"Replay Paths: {replayPaths.Count}, Analyzed Replays: {_mainWindowVM.Matches.Count}");
-            _mainWindow.ShowGraphData();
+                if (screpPath is null || replayPath is null) return new();
+                var matches = Directory.GetFiles(replayPath, "*.rep", SearchOption.TopDirectoryOnly).ToList();
+                matches.Reverse();
+                return matches;
+            });
         }
     }
 }
