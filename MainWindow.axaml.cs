@@ -4,18 +4,22 @@ using System.Collections.ObjectModel;
 using DynamicData;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 
 namespace srra;
 
 public partial class MainWindow : Window
 {
     readonly MainWindowViewModel _mainWindowViewModel;
+    readonly Analyzer _analyzer;
     public MainWindow()
     {
         InitializeComponent();
         _mainWindowViewModel = new MainWindowViewModel();
+        _analyzer = new Analyzer(this, _mainWindowViewModel);
         DataContext = _mainWindowViewModel;
+        var playerName = ConfigurationManager.AppSettings["PlayerName"];
+        if (playerName is null)
+            _mainWindowViewModel.IsPlayerNameSet = false;
         SetEventHandlers();
         ProcessData();
     }
@@ -25,30 +29,7 @@ public partial class MainWindow : Window
         var matches = await MatchLoader.LoadMatches();
         var replayReader = new ReplayReader(this, _mainWindowViewModel, matches);
         await replayReader.ReadReplays();
-        ShowGraphData();
-    }
-
-    private void ShowGraphData()
-    {
-        var apmResults = GetAPMResults();
-        var xData = Enumerable.Range(0, apmResults.Count).Select(x=>(double)x).ToArray();
-        var graph = new Graph(StatisticsPlot, "APM Graph") {
-            xData = xData,
-            yData = apmResults.Select(x => (double?)x ?? 0.0).ToArray()
-        };
-        graph.ShowGraph();
-    }
-
-    private List<int?> GetAPMResults()
-    {
-        var apmResults = new List<int?>();
-        var playerName = ConfigurationManager.AppSettings["PlayerName"];
-        foreach (var match in _mainWindowViewModel.Matches) {
-            var player = match?.Players?.Find(player => player.Name == playerName);
-            if (player is null) continue;
-            apmResults.Add(player.APM);
-        }
-        return apmResults;
+        _analyzer.ShowGraphData();
     }
 
     private void SetEventHandlers()
@@ -62,20 +43,23 @@ public partial class MainWindow : Window
 
     private async void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        using var optionsDialog = new OptionsDialog();
+        var optionsDialog = new OptionsDialog();
         await (optionsDialog.ShowDialog(this));
     }
 
-    private void ExitMenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
+    private void ExitMenuItem_Click(object? sender, RoutedEventArgs e) => Close();
 
-    private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
+    private async void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        MatchesDataGrid.IsVisible = false;
-        StatisticsGrid.IsVisible = true;
-        StatisticsPlot.IsVisible = true;
+        if (_mainWindowViewModel.IsPlayerNameSet || ConfigurationManager.AppSettings["PlayerName"] != "" ) {
+            Title = $"{ConfigurationManager.AppSettings["PlayerName"]}";
+            MatchesDataGrid.IsVisible = false;
+            StatisticsGrid.IsVisible = true;
+            StatisticsPlot.IsVisible = true;
+            return;
+        }
+        var messageBox = new MessageBox("Set a player name!", "Ok");
+        await(messageBox.ShowDialog(this));
     }
 
     private void TableMenuItem_Click(object? sender, RoutedEventArgs e)
@@ -94,6 +78,7 @@ public partial class MainWindow : Window
 public class MainWindowViewModel
 {
     public ObservableCollection<Match> Matches { get; set; } = new();
+    public bool IsPlayerNameSet { get; set; }
     public void RefreshDataGrid(List<Match> matches)
     {
         Matches.Clear();

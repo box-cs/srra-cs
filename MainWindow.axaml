@@ -56,7 +56,7 @@
 				Grid.Row="1"
 				ColumnDefinitions="20, *, 20"
 				RowDefinitions="40, 0, 85, 35, *, 40"
-				IsVisible="False"
+				IsVisible="{Binding IsPlayerNameSet}"
 				>
 				<Label
 					VerticalContentAlignment="Center"
