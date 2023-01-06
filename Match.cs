@@ -9,6 +9,7 @@ namespace srra
 {
     public class Match
     {
+        public string FilePath { get; set; }
         public string? Name { get; set; }
         public string? APMString { get; set; }
         public string? OpponentName { get; set; }
@@ -22,14 +23,14 @@ namespace srra
         public string? Winner { get; set; }
         public List<Player> Players = new();
         public Dictionary<string, JsonElement>? MatchDictionary;
-        public bool IsLadderMatch { get {
-                return MatchTypeId == GameType.TopVsBottom;
-            } }
+        public bool IsLadderMatch { get => MatchTypeId == GameType.TopVsBottom; }
 
-        public Match(string match)
+        public Match(string match, string filePath)
         {
             MatchDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(match);
             if (MatchDictionary is null) throw new Exception("Match deserialization failed");
+            FilePath = filePath;
+
             // Player Data
             var playerName = ConfigurationManager.AppSettings["PlayerName"];
             var matchPlayerDescs = MatchDictionary["Computed"].GetNestedJsonObject()?["PlayerDescs"];
@@ -38,7 +39,6 @@ namespace srra
             // Bug -- I tried to be fancy, by it seems like we'll have to match by name first ..
             var opponent = Players?.Find(p => p.Name != playerName);
             var player = Players?.Find(p => p.ID != opponent?.ID);
-
             // Match Data
             MatchUp = $"{GetRaceAlias(player?.Race)}v{GetRaceAlias(opponent?.Race)}";
             ExtractMatchData();
@@ -51,7 +51,6 @@ namespace srra
             OpponentAPMString = $"{opponent?.APM}/{opponent?.EAPM}";
         }
 
-        public Match(){}
         private void ExtractMatchData()
         {
             if (MatchDictionary is null) return;
@@ -64,6 +63,7 @@ namespace srra
                 .GetNestedJsonObject()?["ID"].GetInt32() ?? (int)GameType.Unkown);
             Map = MatchDictionary["Header"].GetNestedJsonObject()?["Map"].ToString();
         }
+
         private static List<Player> ExtractPlayers(JsonElement? matchPlayers, JsonElement? matchPlayerDescs)
         {
             if (matchPlayerDescs == null || matchPlayers is null) return new();
@@ -104,10 +104,17 @@ namespace srra
             return $"{Name} vs {OpponentName} - {MatchUp} - {Map} - {Result} - {Date}";
         }
 
-        internal void PrintMatch()
+        internal void OpenReplayFolder()
         {
-            if (MatchDictionary == null) return;
-            Trace.WriteLine(ToString());
+            using var proc = new Process() {
+                StartInfo = new ProcessStartInfo() {
+                    UseShellExecute = false,
+                    FileName = "explorer.exe",
+                    CreateNoWindow = true,
+                    Arguments = $"/e, /select, \"{FilePath}\"",
+                },
+            };
+            proc.Start();
         }
     }
 }
