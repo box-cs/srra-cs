@@ -12,6 +12,8 @@ public class Analyzer
     readonly MainWindowViewModel _mainWindowViewModel;
     public WinRates? WinRates;
 
+    public bool IsDoneAnalyzing { get; set; }
+
     public Analyzer(MainWindow mainWindow, MainWindowViewModel mainWindowViewModel)
     {
         _mainWindow = mainWindow;
