@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 using System.Configuration;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace srra
 {
     public class Match
     {
         public string FilePath { get; set; }
+        public string? Host { get; set; }
         public string? Name { get; set; }
         public string? APMString { get; set; }
         public string? OpponentName { get; set; }
@@ -21,78 +23,135 @@ namespace srra
         public string? MatchType { get; set; }
         public GameType MatchTypeId { get; set; }
         public int? WinnerTeam { get; set; }
-        public List<Player> Players = new();
-        public Dictionary<string, JsonElement>? MatchDictionary;
+        public List<Player> Players = new ();
+        public JObject? MatchDictionary;
         public bool IsLadderMatch { get => MatchTypeId == GameType.TopVsBottom; }
-
+        // ReplayLoader should probably parse this instead of the match 
         public Match(string match, string filePath)
         {
-            MatchDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(match);
+            MatchDictionary = JObject.Parse(match);
+
             if (MatchDictionary is null) throw new Exception("Match deserialization failed");
             FilePath = filePath;
-
+            Host = MatchDictionary["Header"]?["Host"]?.ToString();
             // Player Data
-            var playerName = ConfigurationManager.AppSettings["PlayerName"];
-            var matchPlayerDescs = MatchDictionary["Computed"].GetNestedJsonObject()?["PlayerDescs"];
-            var matchPlayers = MatchDictionary["Header"].GetNestedJsonObject()?["Players"];
+            var matchPlayerDescs = MatchDictionary["Computed"]?["PlayerDescs"];
+            var matchPlayers = MatchDictionary["Header"]?["Players"];
             Players = ExtractPlayers(matchPlayers, matchPlayerDescs);
-            var opponent = Players?.Find(p => p.Name != playerName);
-            var player = Players?.Find(p => p.ID != opponent?.ID);
+            var opponent = new Player();
+            var player = new Player();
+
+            if (string.IsNullOrEmpty(Host)) {
+                // Represents an offline game, ID 255 represents a computer player
+                player = Players?.Find(p => p.ID != 255);
+                opponent = Players?.Find(p => p.ID == 255);
+            }
+            else {
+                // Represents an online game
+                opponent = Players?.Find(p => p.Name != ConfigurationManager.AppSettings["PlayerName"]);
+                player = Players?.Find(p => p.ID != opponent?.ID);
+            }
             // Match Data
             MatchUp = $"{GetRaceAlias(player?.Race)}v{GetRaceAlias(opponent?.Race)}";
             ExtractMatchData();
-            WinnerTeam = MatchDictionary["Computed"].GetNestedJsonObject()?["WinnerTeam"].GetInt32();
+            // Determining winner
+            WinnerTeam = MatchDictionary?["Computed"]?["WinnerTeam"]?.Value<int>();
+            var leaveCommands = MatchDictionary?["Computed"]?["LeaveGameCmds"];
+            Players?.ForEach(player => DetermineMatchOutcomes(player, leaveCommands));
 
-            Name = $"{player?.Name} {((player?.TeamID == WinnerTeam) ? "👑" : "☠")}";
+            // This logic only works because we assume that we are the replay owners
+            // As a replay owner, we're able to determine if we've won or not
+            // This means that our opponent's result is the opposite (true for 1v1 games)
+            if ((player?.HasWonMatch == opponent?.HasWonMatch) && Players.Count == 2) {
+                opponent.HasWonMatch = !opponent?.HasWonMatch;
+            }
+
+            Name = StringifyMatchOutcome(player);
+            OpponentName = StringifyMatchOutcome(opponent);
             APMString = $"{player?.APM}/{player?.EAPM}";
-
-            OpponentName = $"{opponent?.Name} {((opponent?.TeamID == WinnerTeam) ? "👑" : "☠")}";
             OpponentAPMString = $"{opponent?.APM}/{opponent?.EAPM}";
+
+        }
+
+        private static string StringifyMatchOutcome(Player? player)
+        {
+            var outcome = new StringBuilder();
+            outcome.Append($"{player?.Name} ({player?.TeamID})");
+            if (player is null || player?.HasWonMatch is null) return outcome.ToString();
+
+            if (player.HasWonMatch == true)
+                outcome.Append(" 👑");
+            else if (player.HasWonMatch == false)
+                outcome.Append(" ☠️");
+
+            return outcome.ToString();  
+        }
+
+        private bool DidPlayerLeaveGame(Player? player, JToken? leaveCommands)
+        {
+            var playerLeftGame = false;
+            leaveCommands?.ToList().ForEach(leavers => {
+                var leaverId = leavers?["PlayerID"]?.Value<int>();
+                if (leaverId == player?.ID) {
+                    playerLeftGame = true;
+                }
+            });
+            return playerLeftGame;
+        }
+
+        private void DetermineMatchOutcomes(Player? player, JToken? leaveCommands)
+        {
+            if (string.IsNullOrEmpty(Host) && player is not null) {
+                player.HasWonMatch = null; // There's no way to determine winner on single player matches
+            }
+            else {
+                // We can determine the losers
+                if (DidPlayerLeaveGame(player, leaveCommands) || WinnerTeam == 0) {
+                    player.HasWonMatch = false;
+                }
+                // We can determine the winner
+                if (WinnerTeam != 0 && player is not null) {
+                    player.HasWonMatch = player?.TeamID == WinnerTeam;
+                    return;
+                }
+
+                // We cannot determine the winner
+                if (leaveCommands is null && player is not null) {
+                    if (player.Name == ConfigurationManager.AppSettings["PlayerName"])
+                        player.HasWonMatch = null;
+                    return;
+                }
+            }
         }
 
         private void ExtractMatchData()
         {
             if (MatchDictionary is null) return;
-            Date = MatchDictionary["Header"].GetNestedJsonObject()?["StartTime"].GetDateTime();
-            MatchType = MatchDictionary["Header"]
-                .GetNestedJsonObject()?["Type"]
-                .GetNestedJsonObject()?["Name"].ToString();
-            MatchTypeId = (GameType)(MatchDictionary["Header"]
-                .GetNestedJsonObject()?["Type"]
-                .GetNestedJsonObject()?["ID"].GetInt32() ?? (int)GameType.Unkown);
-            var map = MatchDictionary["Header"].GetNestedJsonObject()?["Map"].ToString() ?? "";
-            Map = new string(map.ToList().FindAll(c=>(char.IsLetterOrDigit(c)) || char.IsWhiteSpace(c) || char.IsPunctuation(c)).ToArray());
+            Date = MatchDictionary["Header"]?["StartTime"]?.Value<DateTime>();
+            MatchType = MatchDictionary["Header"]?["Type"]?["Name"]?.Value<string>();
+            MatchTypeId = (GameType)((MatchDictionary["Header"]?["Type"]?["ID"]?.Value<int>()) ?? (int)GameType.Unkown); // Horrible
+            var map = MatchDictionary["Header"]?["Map"]?.Value<string>();
+            Map = new string(map?.ToList().FindAll(c => (char.IsLetterOrDigit(c)) || char.IsWhiteSpace(c) || char.IsPunctuation(c)).ToArray());
         }
 
-        private static List<Player> ExtractPlayers(JsonElement? matchPlayers, JsonElement? matchPlayerDescs)
+        private static List<Player> ExtractPlayers(JToken? matchPlayers, JToken? matchPlayerDescs)
         {
             if (matchPlayerDescs == null || matchPlayers is null) return new();
-            var playerName = matchPlayers.Value[0].GetNestedJsonObject()?["Name"].ToString();
-            var playerId = matchPlayers.Value[0].GetNestedJsonObject()?["ID"].GetInt32();
-            var playerTeamId = matchPlayers.Value[0].GetNestedJsonObject()?["Team"].GetInt32();
-            var playerRace = matchPlayers.Value[0].GetNestedJsonObject()?["Race"].GetNestedJsonObject()?["Name"].ToString();
-            var playerAPM = matchPlayerDescs.Value[0].GetNestedJsonObject()?["APM"].GetInt32();
-            var playerEAPM = matchPlayerDescs.Value[0].GetNestedJsonObject()?["EAPM"].GetInt32();
-
-            var opponentName = matchPlayers.Value[1].GetNestedJsonObject()?["Name"].ToString();
-            var opponentId = matchPlayers.Value[1].GetNestedJsonObject()?["ID"].GetInt32();
-            var opponentTeamId = matchPlayers.Value[1].GetNestedJsonObject()?["Team"].GetInt32();
-            var opponentRace = matchPlayers.Value[1].GetNestedJsonObject()?["Race"].GetNestedJsonObject()?["Name"].ToString();
-            var opponentAPM = matchPlayerDescs.Value[1].GetNestedJsonObject()?["APM"].GetInt32();
-            var opponentEAPM = matchPlayerDescs.Value[1].GetNestedJsonObject()?["EAPM"].GetInt32();
-
-            return new () {
-                new Player(playerId, playerTeamId, playerName, playerAPM, playerEAPM, playerRace),
-                new Player(opponentId, opponentTeamId, opponentName, opponentAPM, opponentEAPM, opponentRace),
-            };
+            var count = matchPlayers.ToArray().Length;
+            return Enumerable.Range(0, count).ToList().Select(index => {
+                return new Player() {
+                    Name = matchPlayers[index]?["Name"]?.Value<string>(),
+                    ID = matchPlayers[index]?["ID"]?.Value<int>(),
+                    TeamID = matchPlayers[index]?["Team"]?.Value<int>(),
+                    Race = matchPlayers[index]?["Race"]?["Name"]?.Value<string>(),
+                    APM = matchPlayerDescs[index]?["APM"]?.Value<int>(),
+                    EAPM = matchPlayerDescs[index]?["EAPM"]?.Value<int>(),
+                    HasWonMatch = null
+                };
+            }).ToList();
         }
 
         public static string GetRaceAlias(string? race) => race?[..1] ?? "";
-
-        public override string ToString()
-        {
-            return $"{Name} vs {OpponentName} - {MatchUp} - {Map} - {Result} - {Date}";
-        }
 
         internal void OpenReplayFolder()
         {
