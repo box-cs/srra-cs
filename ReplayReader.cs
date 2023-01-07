@@ -28,16 +28,11 @@ public class ReplayReader
     public async Task<Match?> ReadReplay(string replayPath, string? _screpPath)
     {
         if (string.IsNullOrEmpty(_screpPath) || _replayPaths?.Count == 0) return null;
-        try {
-            var data = await ReadFromSCREP(_screpPath, replayPath);
-            if (string.IsNullOrEmpty(data)) return null;
+        var data = await ReadFromSCREP(_screpPath, replayPath);
 
-            var match = new Match(data, replayPath);
-            return match;
-        }
-        catch (Exception) {
-            // Ignored
-        }
+        if (string.IsNullOrEmpty(data)) return null;
+    
+        return new Match(data, replayPath);
     }
 
     public async Task<List<Match>> ReadReplays()
