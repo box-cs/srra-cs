@@ -28,11 +28,11 @@ public partial class MainWindow : Window
 
     public async void ProcessData()
     {
-        var matches = await MatchLoader.LoadMatches();
-        var replayReader = new ReplayReader(this, _mainWindowViewModel, matches);
-        await replayReader.ReadReplays();
+        var replayReader = new ReplayReader(this, _mainWindowViewModel, await MatchLoader.LoadMatches());
+        var matchObjects = await replayReader.ReadReplays();
+        _mainWindowViewModel.Matches.AddRange(new List<Match>(matchObjects));
         _analyzer.UpdateGraphData();
-        _analyzer.AnalyzeReplays(new List<Match>(replayReader.replayData));
+        _analyzer.AnalyzeReplays(new List<Match>(matchObjects));
         _analyzer.IsDoneAnalyzing = true;
     }
 
@@ -107,7 +107,6 @@ public class MainWindowViewModel
 {
     public ObservableCollection<Match> Matches { get; set; } = new();
     public bool IsPlayerNameSet { get; set; }
-    public WinRates WinRates = new WinRates();
 
     public void RefreshDataGrid(List<Match> matches)
     {

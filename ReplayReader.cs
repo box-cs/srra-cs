@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Configuration;
+using System.Linq;
 
 namespace srra;
 
@@ -24,32 +25,41 @@ public class ReplayReader
         _count = 0;
     }
 
-    public async Task ReadReplay(string replayPath)
+    public async Task<Match?> ReadReplay(string replayPath, string? _screpPath)
     {
-        string? _screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
-        if (string.IsNullOrEmpty(_screpPath) || _replayPaths?.Count == 0) return;
+        if (string.IsNullOrEmpty(_screpPath) || _replayPaths?.Count == 0) return null;
         try {
             var data = await ReadFromSCREP(_screpPath, replayPath);
-            if (string.IsNullOrEmpty(data)) return;
+            if (string.IsNullOrEmpty(data)) return null;
 
             var match = new Match(data, replayPath);
-            if (match.IsLadderMatch) {
-                _mainWindowVM.Matches.Add(match);
-                replayData.Add(match);
-            }
+            return match;
         }
         catch (Exception) {
             // Ignored
         }
     }
 
-    public async Task ReadReplays()
+    public async Task<List<Match>> ReadReplays()
     {
-        if (_replayPaths == null) return;
-        foreach (var replayPath in _replayPaths) {
-            await ReadReplay(replayPath);
-            UpdateProgressBar();
-        }
+        if (_replayPaths == null) return new();
+        string? screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
+
+        var chunkSize = ((_replayPaths.Count) / 10);
+        var chunks = _replayPaths.Chunk(chunkSize <= 50 ? chunkSize : 50);
+        var tasks = new List<Task>();
+        var matches = new List<Match>();
+        foreach(var chunk in chunks) 
+            foreach (var replayPath in chunk) {
+                tasks.Add(new Task(async () => {
+                    var match = await ReadReplay(replayPath, screpPath);
+                    if (match != null)
+                        matches.Add(match);
+                }));
+            }
+        tasks.ForEach(task=>task.Start());
+        await Task.WhenAll(tasks);
+        return matches;
     }
 
     private static async Task<string?> ReadFromSCREP(string screpPath, string replayPath)
