@@ -42,7 +42,7 @@
 				>
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
-					<DataGridTextColumn Header="APM" Width="*" Binding="{Binding APMString}" />
+					<DataGridTextColumn Header="APM/EAPM" Width="*" Binding="{Binding APMString}" />
 					<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
 					<DataGridTextColumn Header="APM/EAPM" Width="*" Binding="{Binding OpponentAPMString}" />
 					<DataGridTextColumn Header="MatchUp" Width="*" Binding="{Binding MatchUp}" />
