@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System;
 using DynamicData;
+using srra.Starcraft;
+using srra.Analyzers;
 
 namespace srra;
 
@@ -28,12 +30,12 @@ public partial class MainWindow : Window
     }
 
 
-    public async void ProcessData()
+    public void ProcessData()
     {
         string? screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
-        var replayPaths = await ReplayReader.LoadMatchesTask();
         List<Match> matches = new();
-        var replayReader = new ReplayReader(replayPaths, screpPath);
+        var replayReader = new ReplayReader(screpPath);
+        replayReader.SetReplayPaths();
         var fillDataGridAction = new Action<List<Match>>((matches) => _mainWindowViewModel.Matches.AddRange(matches));
         var closeAction = new Action(() => Close());
         replayReader.ChunkilyAnalyzeReplays(fillDataGridAction, closeAction);

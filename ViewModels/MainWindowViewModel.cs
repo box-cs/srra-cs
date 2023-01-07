@@ -1,4 +1,5 @@
 ﻿using DynamicData;
+using srra.Starcraft;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
