@@ -38,7 +38,8 @@ public partial class MainWindow : Window
         replayReader.SetReplayPaths();
         var threads = new List<Thread>();
 
-        Enumerable.Range(0, 8).ToList().ForEach(_ => {
+        const int MAX_NUMBER_OF_THREADS = 9;
+        Enumerable.Range(0, MAX_NUMBER_OF_THREADS+1).ToList().ForEach(_ => {
             var thread = new Thread((data) => {
                 var expectedType = new { chunk = new List<string>(), replayReader = new ReplayReader("") };
                 var obj = Helpers.CastTo(data, expectedType);
@@ -47,19 +48,20 @@ public partial class MainWindow : Window
                 chunk.ToList()
                 .ForEach(path => {
                     var match = obj.replayReader.ReadReplay(path);
-                    if (match != null) 
+                    if (match != null)
                         replayReader.replayData.Add(match);
                 });
             });
+            thread.IsBackground = true;
             threads.Add(thread);
         });
         var paths = replayReader.ReplayPaths;
-        var chunkedPaths = paths.Chunk(paths.Count/7);
+        var chunkedPaths = paths.Chunk(paths.Count > MAX_NUMBER_OF_THREADS ? paths.Count / MAX_NUMBER_OF_THREADS : paths.Count);
         byte count = 0;
         foreach (var chunk in chunkedPaths) {
             threads[count++].Start(new { chunk = chunk.ToList(), replayReader });
         }
-        threads.ForEach((thread) => thread.Join());
+        threads.ForEach((thread) => { if (thread.IsAlive) thread.Join();  });
         replayReader.replayData.Sort((a, b) => Nullable.Compare(b.Date, a.Date));
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.UpdateGraphData();
