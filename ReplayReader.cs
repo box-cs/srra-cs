@@ -25,10 +25,10 @@ public class ReplayReader
         _count = 0;
     }
 
-    public async Task<Match?> ReadReplay(string replayPath, string? _screpPath)
+    public Match? ReadReplay(string replayPath, string? _screpPath)
     {
         if (string.IsNullOrEmpty(_screpPath) || _replayPaths?.Count == 0) return null;
-        var data = await ReadFromSCREP(_screpPath, replayPath);
+        var data = ReadFromSCREP(_screpPath, replayPath);
 
         if (string.IsNullOrEmpty(data)) return null;
     
@@ -40,24 +40,23 @@ public class ReplayReader
         if (_replayPaths == null) return new();
         string? screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
 
-        var chunkSize = ((_replayPaths.Count) / 10);
-        var chunks = _replayPaths.Chunk(chunkSize <= 50 ? chunkSize : 50);
+        var chunks = _replayPaths.Chunk(50);
         var tasks = new List<Task>();
         var matches = new List<Match>();
-        foreach(var chunk in chunks) 
-            foreach (var replayPath in chunk) {
-                tasks.Add(new Task(async () => {
-                    var match = await ReadReplay(replayPath, screpPath);
+        foreach (var chunk in chunks)
+            tasks.Add(new Task(() => {
+                foreach (var replayPath in chunk) {
+                    var match = ReadReplay(replayPath, screpPath);
                     if (match != null)
                         matches.Add(match);
-                }));
-            }
+                }
+            }));
         tasks.ForEach(task=>task.Start());
         await Task.WhenAll(tasks);
         return matches;
     }
 
-    private static async Task<string?> ReadFromSCREP(string screpPath, string replayPath)
+    private static string? ReadFromSCREP(string screpPath, string replayPath)
     {
         using var proc = new Process() {
             StartInfo = new ProcessStartInfo() {
@@ -69,7 +68,7 @@ public class ReplayReader
             },
         };
         proc.Start();
-        var data = await proc.StandardOutput.ReadToEndAsync();
+        var data = proc.StandardOutput.ReadToEnd();
         return proc.ExitCode == 0 ? data : null;
     }
 
