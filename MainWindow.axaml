@@ -40,6 +40,22 @@
 				IsVisible="True"
 				Grid.Row="1"
 				>
+				<DataGrid.ContextMenu>
+					<ContextMenu>
+						<MenuItem
+							Name="ViewReplayDetailsMenuItem"
+							Header="View Replay Details">
+						</MenuItem>
+						<MenuItem
+							Name="OpenFolderLocationMenuItem"
+							Header="Open Folder Location">
+						</MenuItem>
+						<MenuItem
+							Name="DeleteFileMenuItem"
+							Header="Delete File">
+						</MenuItem>
+					</ContextMenu>
+				</DataGrid.ContextMenu>
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
 					<DataGridTextColumn Header="APM/EAPM" Width="*" Binding="{Binding APMString}" />
