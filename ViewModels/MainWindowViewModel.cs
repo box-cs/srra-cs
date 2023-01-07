@@ -9,11 +9,5 @@ namespace srra.ViewModels
     {
         public ObservableCollection<Match> Matches { get; set; } = new();
         public bool IsPlayerNameSet { get; set; }
-
-        public void RefreshDataGrid(List<Match> matches)
-        {
-            Matches.Clear();
-            Matches.AddRange(matches);
-        }
     }
 }

@@ -12,7 +12,7 @@ public class Analyzer
 {
     readonly MainWindow _mainWindow;
     readonly MainWindowViewModel _mainWindowViewModel;
-    public WinRates WinRates = new WinRates();
+    public WinRates WinRates = new();
 
     public bool IsDoneAnalyzing { get; set; }
 

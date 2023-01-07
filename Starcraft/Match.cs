@@ -93,7 +93,6 @@ namespace srra.Starcraft
             OpponentName = StringifyMatchOutcome(opponent);
             APMString = $"{player?.APM}/{player?.EAPM}";
             OpponentAPMString = $"{opponent?.APM}/{opponent?.EAPM}";
-
         }
 
         private static string StringifyMatchOutcome(Player? player)
@@ -109,7 +108,6 @@ namespace srra.Starcraft
 
             return outcome.ToString();
         }
-
 
         private void ExtractMatchData()
         {

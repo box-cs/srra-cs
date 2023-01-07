@@ -55,26 +55,6 @@ public class ReplayReader
         return new Match(data, replayPath);
     }
 
-    public List<Task> GenerateGetMatchesTask()
-    {
-        List<Match> matches = new();
-        if (ReplayPaths == null) return new();
-
-        var chunks = ReplayPaths.Chunk(50);
-        var tasks = new List<Task> {
-            new Task(() => {
-                foreach (var chunk in chunks)
-                    foreach (var replayPath in chunk) {
-                        var match = ReadReplay(replayPath);
-                        if (match != null) {
-                            matches.Add(match);
-                        }
-                    }
-            })
-        };
-        return tasks;
-    }
-
     private string? ReadFromSCREP(string replayPath)
     {
         using var proc = new Process()
