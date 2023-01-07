@@ -10,6 +10,26 @@ namespace srra
 {
     public class Match
     {
+        public enum GameType
+        {
+            None,
+            Custom,
+            Melee,
+            FreeForAll,
+            OneOnOne,
+            CaptureTheFlag,
+            Greed,
+            Slaughter,
+            SuddenDeath,
+            Ladder,
+            UMS,
+            TeamMelee,
+            TeamFFA,
+            TeamCTF,
+            Unkown,
+            TopVsBottom,
+
+        };
         public string FilePath { get; set; }
         public string? Host { get; set; }
         public string? Name { get; set; }
