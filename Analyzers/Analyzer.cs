@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using srra.ViewModels;
+using srra.Starcraft;
 
-namespace srra;
+namespace srra.Analyzers;
 
 public class Analyzer
 {
@@ -25,7 +26,8 @@ public class Analyzer
     {
         var apmResults = GetAPMResults();
         var xData = Enumerable.Range(0, apmResults.Count).Select(x => (double)x).ToArray();
-        var graph = new Graph(_mainWindow.StatisticsPlot, "APM Graph") {
+        var graph = new Graph(_mainWindow.StatisticsPlot, "APM Graph")
+        {
             xData = xData,
             yData = apmResults.Select(x => (double?)x ?? 0.0).ToArray()
         };
@@ -44,9 +46,11 @@ public class Analyzer
         if (string.IsNullOrEmpty(playerName)) return;
 
         WinRates = new WinRates();
-        matches.ForEach(match => {
+        matches.ForEach(match =>
+        {
             var player = match.Players.Find(p => p.Name == playerName);
-            if (player != null) {
+            if (player != null)
+            {
                 var opponent = match.Players.Find(p => p.ID != player.ID)!;
                 WinRates[player.Race!][opponent.Race!]["Games"]++;
                 if (match.WinnerTeam == player.TeamID)
@@ -59,9 +63,11 @@ public class Analyzer
     {
         var races = new List<string>() { "Terran", "Zerg", "Protoss" };
 
-        foreach (var player in races.Select((race, index) => (race, index))) 
-            foreach (var opponent in races.Select((race, index) => (race, index))) {
-                var textBlock = new TextBlock() {
+        foreach (var player in races.Select((race, index) => (race, index)))
+            foreach (var opponent in races.Select((race, index) => (race, index)))
+            {
+                var textBlock = new TextBlock()
+                {
                     Text = $"{Match.GetRaceAlias(player.race)}v{Match.GetRaceAlias(opponent.race)}: {WinRates[player.race][opponent.race].GetWinRate():P}",
                     [Grid.RowProperty] = player.index + 1,
                     [Grid.ColumnProperty] = opponent.index + 1,
@@ -78,7 +84,8 @@ public class Analyzer
         var playerName = ConfigurationManager.AppSettings["PlayerName"];
         if (string.IsNullOrEmpty(playerName)) return apmResults;
 
-        foreach (var match in _mainWindowViewModel.Matches) {
+        foreach (var match in _mainWindowViewModel.Matches)
+        {
             var player = match?.Players?.Find(player => player.Name == playerName);
             if (player is null) continue;
             apmResults.Add(player.APM);

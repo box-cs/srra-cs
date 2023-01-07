@@ -1,6 +1,6 @@
 ﻿using ScottPlot.Avalonia;
 
-namespace srra
+namespace srra.Analyzers
 {
     internal class Graph
     {
@@ -8,7 +8,8 @@ namespace srra
         public double[]? yData { get; set; }
 
         public AvaPlot avaPlot;
-        public Graph(AvaPlot plot, string title) {
+        public Graph(AvaPlot plot, string title)
+        {
             avaPlot = plot;
             avaPlot.Plot.Title(title);
         }

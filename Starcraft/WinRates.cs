@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace srra
+namespace srra.Starcraft
 {
     public class WinRates
     {
