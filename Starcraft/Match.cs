@@ -71,7 +71,7 @@ namespace srra.Starcraft
             else
             {
                 // Represents an online game
-                var playerNames = ConfigurationManager.AppSettings["PlayerNames"]?.Split(',');
+                var playerNames = ConfigurationManager.AppSettings["PlayerNames"]?.Split(',') ?? Array.Empty<string>();
                 opponent = Players?.Find(p => !playerNames.Contains(p.Name));
                 player = Players?.Find(p => p.ID != opponent?.ID);
             }
