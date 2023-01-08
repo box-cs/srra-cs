@@ -124,6 +124,7 @@
 			</Label>
 			<Label
 				Name="StatusLabel"
+				FontWeight="SemiBold"
 				VerticalContentAlignment="Center"
 				HorizontalContentAlignment="Center"
 				Grid.Row="3"

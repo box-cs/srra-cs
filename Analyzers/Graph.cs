@@ -8,10 +8,12 @@ namespace srra.Analyzers
         public double[]? yData { get; set; }
 
         public AvaPlot avaPlot;
-        public Graph(AvaPlot plot, string title)
+        public Graph(AvaPlot plot, string title, string xLabel, string yLabel)
         {
             avaPlot = plot;
             avaPlot.Plot.Title(title);
+            avaPlot.Plot.XLabel(xLabel);
+            avaPlot.Plot.YLabel(yLabel);
         }
 
         public void ShowGraph()

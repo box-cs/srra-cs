@@ -5,6 +5,7 @@ using System.Linq;
 using System.Configuration;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using System.IO;
 
 namespace srra.Starcraft
 {
@@ -95,6 +96,23 @@ namespace srra.Starcraft
             OpponentAPMString = $"{opponent?.APM}/{opponent?.EAPM}";
         }
 
+        public override string ToString() => $"{FilePath}";
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (obj is not Match objectAsMatch) return false;
+            return Equals(objectAsMatch);
+        }
+
+        public override int GetHashCode()=>FilePath.GetHashCode();
+
+        public bool Equals(Match other)
+        {
+            if (other == null) return false;
+            return (FilePath.Equals(other.FilePath));
+        }
+
         private static string StringifyMatchOutcome(Player? player)
         {
             var outcome = new StringBuilder();
@@ -140,7 +158,7 @@ namespace srra.Starcraft
 
         public static string GetRaceAlias(string? race) => race?[..1] ?? "";
 
-        internal void OpenReplayFolder()
+        public void OpenReplayFolder()
         {
             using var proc = new Process()
             {
@@ -153,6 +171,18 @@ namespace srra.Starcraft
                 },
             };
             proc.Start();
+        }
+
+        public void DeleteReplayFile(out bool success)
+        {
+            try {
+                if (File.Exists(FilePath))
+                    File.Delete(FilePath);
+                success = true;
+            }
+            catch (IOException) {
+                success = false;
+            }
         }
     }
 }

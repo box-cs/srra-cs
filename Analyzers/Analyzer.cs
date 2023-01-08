@@ -26,7 +26,7 @@ public class Analyzer
     {
         var apmResults = GetAPMResults();
         var xData = Enumerable.Range(0, apmResults.Count).Select(x => (double)x).ToArray();
-        var graph = new Graph(_mainWindow.StatisticsPlot, "APM Graph")
+        var graph = new Graph(_mainWindow.StatisticsPlot, "APM Graph", "Matches", "APM")
         {
             xData = xData,
             yData = apmResults.Select(x => (double?)x ?? 0.0).ToArray()

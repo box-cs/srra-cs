@@ -6,12 +6,16 @@ using System;
 using DynamicData;
 using srra.Starcraft;
 using srra.Analyzers;
+using System.IO;
+
 namespace srra;
 
 public partial class MainWindow : Window
 {
     readonly MainWindowViewModel _mainWindowViewModel;
     readonly Analyzer _analyzer;
+    ReplayReader replayReader;
+
 
     public MainWindow()
     {
@@ -32,12 +36,13 @@ public partial class MainWindow : Window
     {
         StatusLabel.Content = "Loading ...";
         string? screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
-        var replayReader = new ReplayReader(screpPath);
+        replayReader = new ReplayReader(screpPath); 
         replayReader.SetReplayPaths();
         await replayReader.ReadReplaysTask();
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.UpdateGraphData();
         _analyzer.AnalyzeReplays(replayReader.replayData);
+        _analyzer.IsDoneAnalyzing = true;
         StatusLabel.Content = $"Found {replayReader.replayData.Count} replays!";
 
     }
@@ -66,7 +71,13 @@ public partial class MainWindow : Window
 
     private void DeleteFileMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        if (MatchesDataGrid.SelectedItem is not Match match) return;
+
+        match.DeleteReplayFile(out var success);
+
+        if (!success) return;
+        replayReader.replayData.Remove(match);
+        _mainWindowViewModel.Matches.Remove(match);
     }
 
     private void OpenFolderLocationMenuItem_Click(object? sender, RoutedEventArgs e)
