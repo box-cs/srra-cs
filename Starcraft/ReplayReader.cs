@@ -21,6 +21,24 @@ public class ReplayReader
         _screpPath = screpPath;
     }
 
+    public async Task ReadReplaysTask()
+    {
+        await Task.Run(() => {
+            const int MAX_NUMBER_OF_THREADS = 12;
+            var paths = ReplayPaths;
+            var chunkedPaths = paths.Chunk(paths.Count > MAX_NUMBER_OF_THREADS ? paths.Count / MAX_NUMBER_OF_THREADS : paths.Count);
+            Parallel.For(0, chunkedPaths.Count(), (count, state) => {
+                chunkedPaths.ToList()[count].ToList().ForEach(path => {
+                    var match = ReadReplay(path);
+                    if (match != null) {
+                        replayData.Add(match);
+                    }
+                });
+            });
+        });
+        replayData.Sort((a, b) => Nullable.Compare(b.Date, a.Date));
+    }
+
     public Match? ReadReplay(string replayPath)
     {
         var data = ReadFromSCREP(replayPath);

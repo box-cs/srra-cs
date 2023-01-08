@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using srra.ViewModels;
-using System.Collections.Generic;
 using System.Configuration;
 using System;
 using DynamicData;
@@ -31,32 +30,13 @@ public partial class MainWindow : Window
         ProcessData();
     }
 
-    public async Task ReadReplaysTask(ReplayReader replayReader)
-    {
-        await Task.Run(() => {
-            const int MAX_NUMBER_OF_THREADS = 12;
-            var paths = replayReader.ReplayPaths;
-            var chunkedPaths = paths.Chunk(paths.Count > MAX_NUMBER_OF_THREADS ? paths.Count / MAX_NUMBER_OF_THREADS : paths.Count);
-            Parallel.For(0, chunkedPaths.Count(), (count, state) => {
-                chunkedPaths.ToList()[count].ToList().ForEach(path => {
-                    var match = replayReader.ReadReplay(path);
-                    if (match != null) {
-                        replayReader.replayData.Add(match);
-                    }
-                });
-            });
-        });
-
-    }
 
     public async void ProcessData()
     {
         string? screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
         var replayReader = new ReplayReader(screpPath);
         replayReader.SetReplayPaths();
-
-        await ReadReplaysTask(replayReader);
-        replayReader.replayData.Sort((a, b) => Nullable.Compare(b.Date, a.Date));
+        await replayReader.ReadReplaysTask();
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.UpdateGraphData();
         _analyzer.AnalyzeReplays(replayReader.replayData);
@@ -126,16 +106,6 @@ public partial class MainWindow : Window
     {
         StatisticsGrid.IsVisible = isVisible;
         StatisticsPlot.IsVisible = isVisible;
-    }
-
-    private void UpdateProgressBar(int count, int max)
-    {
-        if (count == 0)
-            (new Action(() => SRRAProgressBar.IsVisible = true)).Invoke();
-        if (count == max)
-            (new Action(() => SRRAProgressBar.IsVisible = false)).Invoke();
-
-        new Action(() => SRRAProgressBar.Value = (++count * 100) / max).Invoke();
     }
 }
 
