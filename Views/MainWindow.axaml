@@ -43,32 +43,39 @@
 				Grid.Row="1"
 				SelectionMode="Extended"
 				>
+				<DataGrid.Styles>
+					<Style Selector="DataGridColumnHeader">
+						<Setter Property="HorizontalContentAlignment" Value="Center"/>
+						<Setter Property="AreSeparatorsVisible" Value="False" />
+					</Style>
+					<Style Selector="DataGridCell">
+						<Setter Property="HorizontalContentAlignment" Value="Center"/>
+					</Style>
+				</DataGrid.Styles>
 				<DataGrid.ContextMenu>
 					<ContextMenu>
 						<MenuItem
 							Name="ViewReplayDetailsMenuItem"
-							Header="View Replay Details">
-						</MenuItem>
+							Header="View Replay Details"/>
 						<MenuItem
 							Name="OpenFolderLocationMenuItem"
-							Header="Open Folder Location">
-						</MenuItem>
+							Header="Open Folder Location"/>
 						<MenuItem
 							Name="DeleteFileMenuItem"
-							Header="Delete File">
-						</MenuItem>
+							Header="Delete File"/>
 					</ContextMenu>
 				</DataGrid.ContextMenu>
 				<DataGrid.Columns>
-					<DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
-					<DataGridTextColumn Header="APM/EAPM" Width="120" Binding="{Binding APMString}" />
-					<DataGridTextColumn Header="Opponent" Width="*" Binding="{Binding OpponentName}" />
-					<DataGridTextColumn Header="APM/EAPM" Width="120" Binding="{Binding OpponentAPMString}" />
-					<DataGridTextColumn Header="MatchUp" Width="120" Binding="{Binding MatchUp}" />
-					<DataGridTextColumn Header="Winner" Width="120" Binding="{Binding WinnerTeam}" />
-					<DataGridTextColumn Header="Map" Width="*" Binding="{Binding Map}" />
-					<DataGridTextColumn Header="Type" Width="*" Binding="{Binding MatchType}" />
-					<DataGridTextColumn Header="Date" Width="*" Binding="{Binding Date}" />
+					<DataGridTextColumn Header="Name"     MinWidth="120" Width="*" Binding="{Binding Name}"/>
+					<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding APMString}" />
+					<DataGridTextColumn Header="Opponent" MinWidth="120" Width="*" Binding="{Binding OpponentName}" />
+					<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding OpponentAPMString}" />
+					<DataGridTextColumn Header="MatchUp"  MinWidth="120" Width="120" Binding="{Binding MatchUp}" />
+					<DataGridTextColumn Header="Winner"   MinWidth="120" Width="120" Binding="{Binding WinnerTeam}" />
+					<DataGridTextColumn Header="Map"      MinWidth="120" Width="*" Binding="{Binding Map}" />
+					<DataGridTextColumn Header="Type"     MinWidth="120" Width="*" Binding="{Binding MatchType}" />
+					<DataGridTextColumn Header="Length"   MinWidth="120" Width="120" Binding="{Binding MatchLength}" />
+					<DataGridTextColumn Header="Date"     MinWidth="120" Width="*" Binding="{Binding Date}" />
 				</DataGrid.Columns>
 			</DataGrid>
 			<!-- Statistics -->

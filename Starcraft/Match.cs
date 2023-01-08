@@ -32,6 +32,8 @@ namespace srra.Starcraft
 
         };
         public string FilePath { get; set; }
+        public TimeSpan Duration { get; set; }
+        public string? MatchLength { get => Duration.ToString()[..8]; }
         public string? Host { get; set; }
         public string? Name { get; set; }
         public string? APMString { get; set; }
@@ -55,6 +57,8 @@ namespace srra.Starcraft
             if (MatchDictionary is null) throw new Exception("Match deserialization failed");
             FilePath = filePath;
             Host = MatchDictionary["Header"]?["Host"]?.ToString();
+            var durationInMs = (MatchDictionary["Header"]?["Frames"]?.Value<int>() ?? 0) * 42;
+            Duration = TimeSpan.FromMilliseconds(durationInMs);
             // Player Data
             var matchPlayerDescs = MatchDictionary["Computed"]?["PlayerDescs"];
             var matchPlayers = MatchDictionary["Header"]?["Players"];
