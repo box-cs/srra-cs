@@ -21,33 +21,6 @@ public class ReplayReader
         _screpPath = screpPath;
     }
 
-    public async void ChunkilyAnalyzeReplays(Action<List<Match>> action, Action closeAction)
-    {
-        var chunkedReplayPaths = ReplayPaths?.Chunk(35);
-        if (chunkedReplayPaths != null)
-        {
-            foreach (var chunk in chunkedReplayPaths)
-            {
-                var chunkedMatches = await Task.Run(() =>
-                {
-                    List<Match> chunkedMatches = new();
-                    foreach (var replayPath in chunk)
-                    {
-                        if (string.IsNullOrEmpty(_screpPath) || ReplayPaths?.Count == 0)
-                            continue;
-
-                        var match = ReadReplay(replayPath);
-                        if (match is not null)
-                            chunkedMatches.Add(match);
-                    }
-                    return chunkedMatches;
-                });
-                action.Invoke(chunkedMatches);
-            }
-            closeAction.Invoke();
-        }
-    }
-
     public Match? ReadReplay(string replayPath)
     {
         var data = ReadFromSCREP(replayPath);
