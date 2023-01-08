@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Layout;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using srra.ViewModels;
 using srra.Starcraft;
@@ -42,14 +41,13 @@ public class Analyzer
 
     public void FindWinRatios(List<Match> matches)
     {
-        var playerName = ConfigurationManager.AppSettings["PlayerName"];
-        if (string.IsNullOrEmpty(playerName)) return;
+        if (_mainWindow.PlayerNames.Any(name => string.IsNullOrEmpty(name))) return;
 
         WinRates = new WinRates();
         matches.ForEach(match =>
         {
-            var player = match.Players.Find(p => p.Name == playerName);
-            if (player != null)
+            var player = match.Players.Find(p => p?.Name != null && _mainWindow.PlayerNames.Contains(p.Name));
+            if (player != null) 
             {
                 var opponent = match.Players.Find(p => p.ID != player.ID)!;
                 WinRates[player.Race!][opponent.Race!]["Games"]++;
@@ -81,12 +79,12 @@ public class Analyzer
     private List<int?> GetAPMResults()
     {
         var apmResults = new List<int?>();
-        var playerName = ConfigurationManager.AppSettings["PlayerName"];
-        if (string.IsNullOrEmpty(playerName)) return apmResults;
+
+        if (_mainWindow.PlayerNames.Any(name=>string.IsNullOrEmpty(name))) return apmResults;
 
         foreach (var match in _mainWindowViewModel.Matches)
         {
-            var player = match?.Players?.Find(player => player.Name == playerName);
+            var player = match?.Players.Find(p => p?.Name != null && _mainWindow.PlayerNames.Contains(p.Name));
             if (player is null) continue;
             apmResults.Add(player.APM);
         }

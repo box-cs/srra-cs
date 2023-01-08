@@ -7,7 +7,7 @@
         x:Class="srra.MainWindow"
         Title="SRRA"
 		Width="1600"
-		Height="900"
+		Height="620"
 		Name="SRRAWindow"
 		>
 	<StackPanel>

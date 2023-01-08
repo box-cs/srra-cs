@@ -7,6 +7,7 @@ using DynamicData;
 using srra.Starcraft;
 using srra.Analyzers;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace srra;
 
@@ -15,7 +16,7 @@ public partial class MainWindow : Window
     readonly MainWindowViewModel _mainWindowViewModel;
     readonly Analyzer _analyzer;
     readonly ReplayReader replayReader = new();
-
+    public List<string> PlayerNames = ConfigurationManager.AppSettings["PlayerNames"]?.Split(',').ToList() ?? new();
     public MainWindow()
     {
         InitializeComponent();
@@ -23,8 +24,7 @@ public partial class MainWindow : Window
         _mainWindowViewModel = new MainWindowViewModel();
         _analyzer = new Analyzer(this, _mainWindowViewModel);
         DataContext = _mainWindowViewModel;
-        var playerName = ConfigurationManager.AppSettings["PlayerName"];
-        if (string.IsNullOrEmpty(playerName))
+        if (PlayerNames.Any(name => string.IsNullOrEmpty(name)))
             _mainWindowViewModel.IsPlayerNameSet = false;
         SetEventHandlers();
         ProcessData();
@@ -38,8 +38,8 @@ public partial class MainWindow : Window
         await replayReader.ReadReplaysTask();
         _mainWindowViewModel.Matches.Clear();
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
-        _analyzer.UpdateGraphData();
         _analyzer.AnalyzeReplays(replayReader.replayData);
+        _analyzer.UpdateGraphData();
         _analyzer.IsDoneAnalyzing = true;
         StatusLabel.Content = $"Found {replayReader.replayData.Count} replays!";
     }
@@ -97,8 +97,8 @@ public partial class MainWindow : Window
 
     private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        if (_mainWindowViewModel.IsPlayerNameSet || 
-            !string.IsNullOrEmpty(ConfigurationManager.AppSettings["PlayerName"]) &&
+        if (_mainWindowViewModel.IsPlayerNameSet ||
+            PlayerNames.Any(name => !string.IsNullOrEmpty(name)) &&
              _analyzer.IsDoneAnalyzing) {
             MatchesDataGrid.IsVisible = false;
             UpdateStatisticsTabVisibility(true);
