@@ -41,6 +41,7 @@
 				IsReadOnly="True"
 				IsVisible="True"
 				Grid.Row="1"
+				SelectionMode="Extended"
 				>
 				<DataGrid.ContextMenu>
 					<ContextMenu>

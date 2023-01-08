@@ -6,7 +6,7 @@ using System;
 using DynamicData;
 using srra.Starcraft;
 using srra.Analyzers;
-using System.IO;
+using System.Collections.Generic;
 
 namespace srra;
 
@@ -14,7 +14,7 @@ public partial class MainWindow : Window
 {
     readonly MainWindowViewModel _mainWindowViewModel;
     readonly Analyzer _analyzer;
-    ReplayReader replayReader;
+    ReplayReader replayReader = new("");
 
 
     public MainWindow()
@@ -44,7 +44,6 @@ public partial class MainWindow : Window
         _analyzer.AnalyzeReplays(replayReader.replayData);
         _analyzer.IsDoneAnalyzing = true;
         StatusLabel.Content = $"Found {replayReader.replayData.Count} replays!";
-
     }
 
     private void SetEventHandlers()
@@ -61,6 +60,7 @@ public partial class MainWindow : Window
 
     private void MatchesDataGrid_DoubleTapped(object? sender, RoutedEventArgs e)
     {
+        if (MatchesDataGrid.SelectedItem is not Match match) return;
         throw new NotImplementedException();
     }
 
@@ -71,28 +71,33 @@ public partial class MainWindow : Window
 
     private void DeleteFileMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        if (MatchesDataGrid.SelectedItem is not Match match) return;
+        List<Match> itemsToDelete = new();
+        foreach (var item in MatchesDataGrid.SelectedItems)
+            if (item is Match match) 
+                itemsToDelete.Add(match);   
 
-        match.DeleteReplayFile(out var success);
-
-        if (!success) return;
-        replayReader.replayData.Remove(match);
-        _mainWindowViewModel.Matches.Remove(match);
+        itemsToDelete.ForEach(match => {
+            match.DeleteReplayFile(out var success);
+            if (!success) return;
+            replayReader.replayData.Remove(match);
+            _mainWindowViewModel.Matches.Remove(match);
+        });
     }
 
     private void OpenFolderLocationMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        if (MatchesDataGrid.SelectedItem is Match match)
-            match.OpenReplayFolder();
+        foreach (var item in MatchesDataGrid.SelectedItems) 
+            if (item is Match match) 
+                match.OpenReplayFolder();
     }
 
-    private async void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
+    private void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         var optionsDialog = new OptionsDialog();
-        await (optionsDialog.ShowDialog(this));
+        optionsDialog.ShowDialog(this);
     }
 
-    private async void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
+    private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         if (_mainWindowViewModel.IsPlayerNameSet || 
             !string.IsNullOrEmpty(ConfigurationManager.AppSettings["PlayerName"]) &&
@@ -102,7 +107,7 @@ public partial class MainWindow : Window
             return;
         }
         var messageBox = new MessageBox(_analyzer.IsDoneAnalyzing ? "Set a player name!" : "Wait for analyzer!", "Ok");
-        await(messageBox.ShowDialog(this));
+        messageBox.ShowDialog(this);
     }
     
     private void ExitMenuItem_Click(object? sender, RoutedEventArgs e) => Close();
