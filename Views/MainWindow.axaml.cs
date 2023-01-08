@@ -6,9 +6,6 @@ using System;
 using DynamicData;
 using srra.Starcraft;
 using srra.Analyzers;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace srra;
 
 public partial class MainWindow : Window
@@ -33,6 +30,7 @@ public partial class MainWindow : Window
 
     public async void ProcessData()
     {
+        StatusLabel.Content = "Loading ...";
         string? screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
         var replayReader = new ReplayReader(screpPath);
         replayReader.SetReplayPaths();
@@ -40,6 +38,8 @@ public partial class MainWindow : Window
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.UpdateGraphData();
         _analyzer.AnalyzeReplays(replayReader.replayData);
+        StatusLabel.Content = $"Found {replayReader.replayData.Count} replays!";
+
     }
 
     private void SetEventHandlers()

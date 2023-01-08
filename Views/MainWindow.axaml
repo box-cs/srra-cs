@@ -122,14 +122,13 @@
 				HorizontalContentAlignment="Right">
 				Starcraft Remastered Replay Analyzer
 			</Label>
-			<ProgressBar
-				Name="SRRAProgressBar"
+			<Label
+				Name="StatusLabel"
+				VerticalContentAlignment="Center"
+				HorizontalContentAlignment="Center"
 				Grid.Row="3"
-				Width="30"
-				ShowProgressText="True"
-				IsVisible="False"
 				>
-			</ProgressBar>
+			</Label>
 		</Grid>
 	</StackPanel>
 </Window>
