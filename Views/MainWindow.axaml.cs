@@ -7,8 +7,8 @@ using System;
 using DynamicData;
 using srra.Starcraft;
 using srra.Analyzers;
-using System.Threading;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace srra;
 
@@ -30,43 +30,36 @@ public partial class MainWindow : Window
         SetEventHandlers();
         ProcessData();
     }
- 
-    public void ProcessData()
+
+    public async Task ReadReplaysTask(ReplayReader replayReader)
+    {
+        await Task.Run(() => {
+            const int MAX_NUMBER_OF_THREADS = 12;
+            var paths = replayReader.ReplayPaths;
+            var chunkedPaths = paths.Chunk(paths.Count > MAX_NUMBER_OF_THREADS ? paths.Count / MAX_NUMBER_OF_THREADS : paths.Count);
+            Parallel.For(0, chunkedPaths.Count(), (count, state) => {
+                chunkedPaths.ToList()[count].ToList().ForEach(path => {
+                    var match = replayReader.ReadReplay(path);
+                    if (match != null) {
+                        replayReader.replayData.Add(match);
+                    }
+                });
+            });
+        });
+
+    }
+
+    public async void ProcessData()
     {
         string? screpPath = ConfigurationManager.AppSettings["SCREP_Path"];
         var replayReader = new ReplayReader(screpPath);
         replayReader.SetReplayPaths();
-        var threads = new List<Thread>();
 
-        const int MAX_NUMBER_OF_THREADS = 9;
-        Enumerable.Range(0, MAX_NUMBER_OF_THREADS+1).ToList().ForEach(_ => {
-            var thread = new Thread((data) => {
-                var expectedType = new { chunk = new List<string>(), replayReader = new ReplayReader("") };
-                var obj = Helpers.CastTo(data, expectedType);
-                var replayReader = obj.replayReader;
-                var chunk = obj.chunk;
-                chunk.ToList()
-                .ForEach(path => {
-                    var match = obj.replayReader.ReadReplay(path);
-                    if (match != null)
-                        replayReader.replayData.Add(match);
-                });
-            });
-            thread.IsBackground = true;
-            threads.Add(thread);
-        });
-        var paths = replayReader.ReplayPaths;
-        var chunkedPaths = paths.Chunk(paths.Count > MAX_NUMBER_OF_THREADS ? paths.Count / MAX_NUMBER_OF_THREADS : paths.Count);
-        byte count = 0;
-        foreach (var chunk in chunkedPaths) {
-            threads[count++].Start(new { chunk = chunk.ToList(), replayReader });
-        }
-        threads.ForEach((thread) => { if (thread.IsAlive) thread.Join();  });
+        await ReadReplaysTask(replayReader);
         replayReader.replayData.Sort((a, b) => Nullable.Compare(b.Date, a.Date));
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.UpdateGraphData();
         _analyzer.AnalyzeReplays(replayReader.replayData);
-        _analyzer.IsDoneAnalyzing = true;
     }
 
     private void SetEventHandlers()
