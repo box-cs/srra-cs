@@ -14,13 +14,11 @@ public class ReplayReader
     public List<Match> replayData = new();
     public List<Thread> processingThreads = new();
     public List<string> ReplayPaths = new();
-    private readonly string? _screpPath;
+    public static readonly string? ScrepPath = ConfigurationManager.AppSettings["SCREP_Path"];
 
-    public ReplayReader(string? screpPath)
-    {
-        _screpPath = screpPath;
-    }
+    public ReplayReader() { }
 
+    public static bool IsScrepPathSet => File.Exists($"{ScrepPath}\\screp.exe");
     public async Task ReadReplaysTask()
     {
         await Task.Run(() => {
@@ -53,7 +51,7 @@ public class ReplayReader
             StartInfo = new ProcessStartInfo()
             {
                 UseShellExecute = false,
-                FileName = $"{_screpPath}\\screp.exe",
+                FileName = $"{ScrepPath}\\screp.exe",
                 CreateNoWindow = true,
                 Arguments = $"-map \"{replayPath}\"",
                 RedirectStandardOutput = true,
@@ -68,7 +66,7 @@ public class ReplayReader
     {
         var replayPath = ConfigurationManager.AppSettings["Replay_Path"];
 
-        if (string.IsNullOrEmpty(_screpPath) || string.IsNullOrEmpty(replayPath)) return;
+        if (string.IsNullOrEmpty(ScrepPath) || string.IsNullOrEmpty(replayPath)) return;
         var matches = Directory.GetFiles(replayPath, "*.rep", SearchOption.AllDirectories).ToList();
         matches.Reverse();
         ReplayPaths = new List<string>(matches);
