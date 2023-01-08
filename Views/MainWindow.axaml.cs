@@ -14,8 +14,7 @@ public partial class MainWindow : Window
 {
     readonly MainWindowViewModel _mainWindowViewModel;
     readonly Analyzer _analyzer;
-    ReplayReader replayReader;
-
+    readonly ReplayReader replayReader = new();
 
     public MainWindow()
     {
@@ -35,9 +34,9 @@ public partial class MainWindow : Window
     {
         if (!ReplayReader.IsScrepPathSet) return;
         StatusLabel.Content = "Loading ...";
-        replayReader = new ReplayReader();
         replayReader.SetReplayPaths();
         await replayReader.ReadReplaysTask();
+        _mainWindowViewModel.Matches.Clear();
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.UpdateGraphData();
         _analyzer.AnalyzeReplays(replayReader.replayData);
