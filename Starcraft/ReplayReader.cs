@@ -3,9 +3,9 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Configuration;
 using System.Linq;
 using System.IO;
+using System.Configuration;
 
 namespace srra.Starcraft;
 
@@ -18,9 +18,9 @@ public class ReplayReader
 
     public ReplayReader() { }
 
-    public static bool IsScrepPathSet => File.Exists($"{ScrepPath}\\screp.exe");
     public async Task ReadReplaysTask()
     {
+        replayData.Clear();
         await Task.Run(() => {
             const int MAX_NUMBER_OF_THREADS = 12;
             var paths = ReplayPaths;
@@ -53,7 +53,7 @@ public class ReplayReader
                 UseShellExecute = false,
                 FileName = $"{ScrepPath}\\screp.exe",
                 CreateNoWindow = true,
-                Arguments = $"-map \"{replayPath}\"",
+                Arguments = $"-map -indent=false \"{replayPath}\"",
                 RedirectStandardOutput = true,
             },
         };
@@ -66,7 +66,7 @@ public class ReplayReader
     {
         var replayPath = ConfigurationManager.AppSettings["Replay_Path"];
 
-        if (string.IsNullOrEmpty(ScrepPath) || string.IsNullOrEmpty(replayPath)) return;
+        if (string.IsNullOrEmpty(replayPath)) return;
         var matches = Directory.GetFiles(replayPath, "*.rep", SearchOption.AllDirectories).ToList();
         matches.Reverse();
         ReplayPaths = new List<string>(matches);
