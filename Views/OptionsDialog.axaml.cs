@@ -18,7 +18,7 @@ namespace srra
         {
             var content = PlayerNameTextBox.Text;
             if (content is not null)
-                SaveConfig("PlayerName", content);
+                SaveConfig("PlayerNames", content);
         }
 
         private void SetSCREPPathButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
