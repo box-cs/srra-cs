@@ -1,9 +1,8 @@
-﻿using Avalonia.Controls;
-using Avalonia.Layout;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using srra.ViewModels;
 using srra.Starcraft;
+using System.Data;
 
 namespace srra.Analyzers;
 
@@ -35,11 +34,10 @@ public class Analyzer
 
     public void AnalyzeReplays(List<Match> matches)
     {
-        FindWinRatios(matches);
-        UpdateWinRatios();
+        SetWinRatios(matches);
     }
 
-    public void FindWinRatios(List<Match> matches)
+    public void SetWinRatios(List<Match> matches)
     {
         if (_mainWindow.PlayerNames.Any(name => string.IsNullOrEmpty(name))) return;
 
@@ -55,25 +53,6 @@ public class Analyzer
                     WinRates[player.Race!][opponent.Race!]["Wins"]++;
             }
         });
-    }
-
-    public void UpdateWinRatios()
-    {
-        var races = new List<string>() { "Terran", "Zerg", "Protoss" };
-
-        foreach (var player in races.Select((race, index) => (race, index)))
-            foreach (var opponent in races.Select((race, index) => (race, index)))
-            {
-                var textBlock = new TextBlock()
-                {
-                    Text = $"{Match.GetRaceAlias(player.race)}v{Match.GetRaceAlias(opponent.race)}: {WinRates[player.race][opponent.race].GetWinRate():P}",
-                    [Grid.RowProperty] = player.index + 1,
-                    [Grid.ColumnProperty] = opponent.index + 1,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                _mainWindow.WinRatesGrid.Children.Add(textBlock);
-            }
     }
 
     private List<int?> GetAPMResults()
