@@ -5,6 +5,18 @@ namespace srra.Starcraft
 {
     public class WinRates
     {
+        public List<SimpleWinRate> ToSimpleWinRates()
+        {
+            List<SimpleWinRate> simpleWinRates = new ();
+            var races = new List<string>() { "Terran", "Protoss", "Zerg"};
+            foreach (var playerRace in races) { 
+              foreach (var opponentRace in races) {
+                    simpleWinRates.Add(new SimpleWinRate(this, playerRace, opponentRace));
+                }
+            }
+            return simpleWinRates;
+        }
+
         public readonly Dictionary<string, Matchup> _winRates = new() {
             {"Terran", new Matchup() },
             {"Protoss", new Matchup() },
