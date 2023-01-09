@@ -82,14 +82,15 @@
 			<Grid
 				Name="StatisticsGrid"
 				Grid.Row="1"
-				ColumnDefinitions="20, *, 20"
-				RowDefinitions="40, 0, 85, 35, *, 40"
+				ColumnDefinitions="20, *, Auto, 20"
+				RowDefinitions="40, 0, *, 40"
 				IsVisible="{Binding IsPlayerNameSet}"
 				>
 				<Label
 					VerticalContentAlignment="Center"
 					HorizontalContentAlignment="Center"
 					Grid.Row="0"
+					Grid.ColumnSpan="2"
 					Grid.Column="1"
 					FontWeight="Bold"
 					FontSize="20"
@@ -98,27 +99,50 @@
 				</Label>
 				<Rectangle
 					Grid.Row="1"
+					Grid.ColumnSpan="2"
 					Grid.Column="1"
 					HorizontalAlignment="Stretch"
 					Fill="LightBlue"
 					Height="1"
 					IsVisible="True"
+					Margin="20"
 					/>
-				<Grid
-					Name="WinRatesGrid"
+				
+				<DataGrid
+					Name="WinRatesDataGrid"
+					Items="{Binding SimpleWinRates}"
+					RowBackground="LightBlue"
+					AlternatingRowBackground="LightCyan"
+					CanUserSortColumns="True"
+					CanUserResizeColumns="False"
+					IsReadOnly="True"
 					IsVisible="True"
-					Margin="5"
 					Grid.Row="2"
-					Grid.Column="1"
-					RowDefinitions="*,*,*,*"
-					ColumnDefinitions="50,*,*,*,50">
-				</Grid>
+					Grid.Column="2"
+					SelectionMode="Single"
+					VerticalAlignment="Top"
+					>
+					<DataGrid.Styles>
+						<Style Selector="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment" Value="Center"/>
+							<Setter Property="AreSeparatorsVisible" Value="False" />
+						</Style>
+						<Style Selector="DataGridCell">
+							<Setter Property="HorizontalContentAlignment" Value="Center"/>
+						</Style>
+					</DataGrid.Styles>
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="MatchUp" MinWidth="120" Width="120" Binding="{Binding MatchUp}" />
+						<DataGridTextColumn Header="Winrate" MinWidth="120" Width="120" Binding="{Binding WinRate}" />
+						<DataGridTextColumn Header="Matches" MinWidth="120" Width="120" Binding="{Binding MatchCount}" />
+						<DataGridTextColumn Header="MatchWins" MinWidth="120" Width="120" Binding="{Binding MatchWins}" />
+					</DataGrid.Columns>
+				</DataGrid>
 				<ScottPlot:AvaPlot
 					Name="StatisticsPlot"
 					IsEnabled="True"
-					Grid.Row="4"
+					Grid.Row="2"
 					Grid.Column="1"
-					Width="{Binding #StatisticsPlot.Bounds.Height}"
 					IsVisible="False"
 					/>
 			</Grid>

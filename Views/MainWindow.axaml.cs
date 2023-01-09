@@ -39,6 +39,8 @@ public partial class MainWindow : Window
         _mainWindowViewModel.Matches.Clear();
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.AnalyzeReplays(replayReader.replayData);
+        _mainWindowViewModel.SimpleWinRates.Clear();
+        _mainWindowViewModel.SimpleWinRates.AddRange(_analyzer.WinRates.ToSimpleWinRates());
         _analyzer.UpdateGraphData();
         _analyzer.IsDoneAnalyzing = true;
         StatusLabel.Content = $"Found {replayReader.replayData.Count} replays!";
