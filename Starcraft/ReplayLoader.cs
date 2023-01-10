@@ -1,16 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
-using ScottPlot.Drawing.Colormaps;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using static srra.Starcraft.Match;
-using System.Xml.Linq;
 
 namespace srra.Starcraft;
 
@@ -18,6 +12,14 @@ public class ReplayLoader
 {
     public JObject MatchDictionary;
     public string FilePath;
+    private JToken? PlayerDescs { get => MatchDictionary["Computed"]?["PlayerDescs"]; }
+    private JToken? MatchPlayers { get => MatchDictionary["Header"]?["Players"]; }
+    private JToken? LeaveCommands { get => MatchDictionary?["Computed"]?["LeaveGameCmds"]; }
+    private string Host { get => MatchDictionary["Header"]?["Host"]?.Value<string>() ?? ""; }
+    private string? ActualMapName { get => MatchDictionary?["Header"]?["Map"]?.Value<string>(); }
+    private int GameTypeId { get => MatchDictionary?["Header"]?["Type"]?["ID"]?.Value<int>() ?? (int)GameType.Unkown; }
+    private bool IsOfflineGame { get => string.IsNullOrEmpty(Host); }
+
     public ReplayLoader(string match, string filePath)
     {
         MatchDictionary = JObject.Parse(match);
@@ -26,46 +28,44 @@ public class ReplayLoader
 
     public Match ToMatch()
     {
-        var durationInMs = (MatchDictionary["Header"]?["Frames"]?.Value<int>() ?? 0) * 42;
-        var matchPlayerDescs = MatchDictionary["Computed"]?["PlayerDescs"];
-        var matchPlayers = MatchDictionary["Header"]?["Players"];
         var opponent = new Player();
         var player = new Player();
-        List<Player> players = ExtractPlayers(matchPlayers, matchPlayerDescs);
-        var host = MatchDictionary["Header"]?["Host"]?.ToString() ?? "";
-        var leaveCommands = MatchDictionary?["Computed"]?["LeaveGameCmds"];
+        List<Player> players = ExtractPlayers(MatchPlayers, PlayerDescs);
 
-        if (string.IsNullOrEmpty(host)) {
-            // Represents an offline game, ID 255 represents a computer player
-            player = players?.Find(p => p.ID != 255);
-            opponent = players?.Find(p => p.ID == 255);
+        if (IsOfflineGame) {
+            player = players?.Find(p => p.ID != 255);  
+            opponent = players?.Find(p => p.ID == 255); // 255 is the Computer Player ID
         }
         else {
-            // Represents an online game
             var playerNames = ConfigurationManager.AppSettings["PlayerNames"]?.Split(',').ToList() ?? new();
-            opponent = players?.Find(p => !playerNames.Contains(p.Name));
+            opponent = players?.Find(p => p?.Name is not null && !playerNames.Contains(p.Name));
             player = players?.Find(p => p.ID != opponent?.ID);
         }
 
-        var map = MatchDictionary?["Header"]?["Map"]?.Value<string>();
         // Determining winner
         int? winnerTeam = MatchDictionary?["Computed"]?["WinnerTeam"]?.Value<int>();
-        players?.ForEach(player => player.DetermineMatchOutcomes(leaveCommands, winnerTeam ?? 0, host));
-        // This logic only works because we assume that we are the replay owners
-        // As a replay owner, we're able to determine if we've won or not
-        // This means that our opponent's result is the opposite (true for 1v1 games)
+        players?.ForEach(player => player.DetermineMatchOutcomes(LeaveCommands, winnerTeam ?? 0, Host));
+        // Uses player names to assume who is the replay owner
+        // As a replay owner, we're able to determine if we've lost (and for 1v1 games, we can also determine winner)
+        // This means that for 1v1s our opponents results are the opposite of our loss result
         if (player?.HasWonMatch == opponent?.HasWonMatch && players?.Count == 2 && opponent is not null)
             opponent.HasWonMatch = !opponent?.HasWonMatch;
 
+        var sanitizedMapName = new string(ActualMapName?.ToList()
+            .FindAll(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || char.IsPunctuation(c)).ToArray());
         return new Match(FilePath) {
-            Host = host,
-            Duration = TimeSpan.FromMilliseconds(durationInMs),
-            Players = players,
+            // Meta
+            Host = Host,
+            Duration = TimeSpan.FromMilliseconds((MatchDictionary?["Header"]?["Frames"]?.Value<int>() ?? 0) * 42),
             Date = MatchDictionary?["Header"]?["StartTime"]?.Value<DateTime>(),
+            // Map Data
+            Map = sanitizedMapName,
             MatchType = MatchDictionary?["Header"]?["Type"]?["Name"]?.Value<string>(),
-            MatchTypeId = (GameType)((MatchDictionary?["Header"]?["Type"]?["ID"]?.Value<int>()) ?? (int)GameType.Unkown), // Horrible
+            MatchTypeId = ((GameType)GameTypeId),
+            // Player Data
+            Players = players ?? new(),
             MatchUp = $"{GetRaceAlias(player?.Race)}v{GetRaceAlias(opponent?.Race)}",
-            Map = new string(map?.ToList().FindAll(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || char.IsPunctuation(c)).ToArray()),
+            // Players represented in datagrid columns
             Name = StringifyMatchOutcome(player),
             OpponentName = StringifyMatchOutcome(opponent),
             APMString = $"{player?.APM}/{player?.EAPM}",
