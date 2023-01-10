@@ -44,7 +44,7 @@ public class Analyzer
         WinRates = new WinRates();
         matches.ForEach(match =>
         {
-            var player = match.Players.Find(p => p?.Name != null && _mainWindow.PlayerNames.Contains(p.Name));
+            var player = match.Players.Find(p => !string.IsNullOrEmpty(p?.Name) && _mainWindow.PlayerNames.Contains(p.Name));
             if (player != null) 
             {
                 var opponent = match.Players.Find(p => p.ID != player.ID)!;

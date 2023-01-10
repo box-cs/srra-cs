@@ -62,6 +62,7 @@ public class ReplayLoader
             Map = sanitizedMapName,
             MatchType = MatchDictionary?["Header"]?["Type"]?["Name"]?.Value<string>(),
             MatchTypeId = ((GameType)GameTypeId),
+            WinnerTeam = winnerTeam,
             // Player Data
             Players = players ?? new(),
             MatchUp = $"{GetRaceAlias(player?.Race)}v{GetRaceAlias(opponent?.Race)}",

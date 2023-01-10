@@ -107,7 +107,6 @@
 					IsVisible="True"
 					Margin="20"
 					/>
-				
 				<DataGrid
 					Name="WinRatesDataGrid"
 					Items="{Binding SimpleWinRates}"
@@ -116,7 +115,6 @@
 					CanUserSortColumns="True"
 					CanUserResizeColumns="False"
 					IsReadOnly="True"
-					IsVisible="True"
 					Grid.Row="2"
 					Grid.Column="2"
 					SelectionMode="Single"
@@ -143,7 +141,6 @@
 					IsEnabled="True"
 					Grid.Row="2"
 					Grid.Column="1"
-					IsVisible="False"
 					/>
 			</Grid>
 			<Rectangle Fill="LightBlue" Grid.Row="3"></Rectangle>

@@ -32,14 +32,17 @@ public partial class MainWindow : Window
 
     public async void ProcessData()
     {
+        _analyzer.IsDoneAnalyzing = false;
         StatusLabel.Content = "Loading ...";
         replayReader.replayData.Clear();
-        replayReader.SetReplayPaths();
         _mainWindowViewModel.Matches.Clear();
-        await replayReader.ReadReplaysTask();
-        _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
-        _analyzer.AnalyzeReplays(replayReader.replayData);
         _mainWindowViewModel.SimpleWinRates.Clear();
+
+        replayReader.SetReplayPaths();
+        await replayReader.ReadReplaysTask();
+        _analyzer.AnalyzeReplays(replayReader.replayData);
+
+        _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _mainWindowViewModel.SimpleWinRates.AddRange(_analyzer.WinRates.ToSimpleWinRates());
         _analyzer.UpdateGraphData();
         _analyzer.IsDoneAnalyzing = true;
