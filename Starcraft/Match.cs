@@ -75,7 +75,7 @@ namespace srra.Starcraft
             else
             {
                 // Represents an online game
-                var playerNames = ConfigurationManager.AppSettings["PlayerNames"]?.Split(',') ?? Array.Empty<string>();
+                var playerNames = ConfigurationManager.AppSettings["PlayerNames"]?.Split(',').ToList() ?? new();
                 opponent = Players?.Find(p => !playerNames.Contains(p.Name));
                 player = Players?.Find(p => p.ID != opponent?.ID);
             }
@@ -90,10 +90,8 @@ namespace srra.Starcraft
             // This logic only works because we assume that we are the replay owners
             // As a replay owner, we're able to determine if we've won or not
             // This means that our opponent's result is the opposite (true for 1v1 games)
-            if (player?.HasWonMatch == opponent?.HasWonMatch && Players.Count == 2)
-            {
+            if (player?.HasWonMatch == opponent?.HasWonMatch && Players?.Count == 2 && opponent is not null)
                 opponent.HasWonMatch = !opponent?.HasWonMatch;
-            }
 
             Name = StringifyMatchOutcome(player);
             OpponentName = StringifyMatchOutcome(opponent);
