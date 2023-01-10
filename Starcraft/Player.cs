@@ -17,8 +17,7 @@ namespace srra.Starcraft
         public bool DidPlayerLeaveGame(JToken? leaveCommands)
         {
             var playerLeftGame = false;
-            leaveCommands?.ToList().ForEach(leavers =>
-            {
+            leaveCommands?.ToList().ForEach(leavers => {
                 var leaverId = leavers?["PlayerID"]?.Value<int>();
                 if (ID is not null)
                     playerLeftGame = leaverId == ID;
@@ -26,34 +25,28 @@ namespace srra.Starcraft
             return playerLeftGame;
         }
 
-
-        public void DetermineMatchOutcomes(JToken? leaveCommands, Match match)
+        public void DetermineMatchOutcomes(JToken? leaveCommands, int winnerTeam, string host)
         {
-            if (string.IsNullOrEmpty(match.Host))
-            {
+            if (string.IsNullOrEmpty(host)) {
                 HasWonMatch = null; // There's no way to determine winner on single player matches
             }
-            else
-            {
+            else {
                 // We can determine the losers
-                if (DidPlayerLeaveGame(leaveCommands) || match.WinnerTeam == 0)
+                if (DidPlayerLeaveGame(leaveCommands) || winnerTeam == 0)
                     HasWonMatch = false;
                 // We can determine the winner
-                if (match.WinnerTeam != 0)
-                {
-                    HasWonMatch = TeamID == match.WinnerTeam;
+                if (winnerTeam != 0) {
+                    HasWonMatch = TeamID == winnerTeam;
                     return;
                 }
 
                 // We cannot determine the winner
-                if (leaveCommands is null)
-                {
+                if (leaveCommands is null) {
                     if (Name == ConfigurationManager.AppSettings["PlayerName"])
                         HasWonMatch = null;
                     return;
                 }
             }
         }
-
     }
 }
