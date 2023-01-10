@@ -16,7 +16,7 @@ public partial class MainWindow : Window
     readonly MainWindowViewModel _mainWindowViewModel;
     readonly Analyzer _analyzer;
     readonly ReplayReader replayReader = new();
-    public List<string> PlayerNames = ConfigurationManager.AppSettings["PlayerNames"]?.Split(',').ToList() ?? new();
+    public List<string> PlayerNames { get => ConfigurationManager.AppSettings["PlayerNames"]?.Split(',').ToList() ?? new(); }
     public MainWindow()
     {
         InitializeComponent();
@@ -32,11 +32,11 @@ public partial class MainWindow : Window
 
     public async void ProcessData()
     {
-        if (!ReplayReader.IsScrepPathSet) return;
         StatusLabel.Content = "Loading ...";
+        replayReader.replayData.Clear();
         replayReader.SetReplayPaths();
-        await replayReader.ReadReplaysTask();
         _mainWindowViewModel.Matches.Clear();
+        await replayReader.ReadReplaysTask();
         _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
         _analyzer.AnalyzeReplays(replayReader.replayData);
         _mainWindowViewModel.SimpleWinRates.Clear();
@@ -91,10 +91,21 @@ public partial class MainWindow : Window
                 match.OpenReplayFolder();
     }
 
-    private void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
+    private async void OptionsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
+        var path = ReplayReader.ScrepPath;
+        var playerNames = PlayerNames;
+        var replayPath = ReplayReader.ReplayPath;
+
         var optionsDialog = new OptionsDialog();
-        optionsDialog.ShowDialog(this);
+        var result = optionsDialog.ShowDialog(this);
+        await result;
+
+        // If we've made any changes, re-process the data
+        if (ReplayReader.ScrepPath != path ||
+            !playerNames.SequenceEqual(PlayerNames) ||
+            replayPath != ReplayReader.ReplayPath)
+            ProcessData();
     }
 
     private void StatisticsMenuItem_Click(object? sender, RoutedEventArgs e)
@@ -102,7 +113,7 @@ public partial class MainWindow : Window
         if (_mainWindowViewModel.IsPlayerNameSet ||
             PlayerNames.Any(name => !string.IsNullOrEmpty(name)) &&
              _analyzer.IsDoneAnalyzing) {
-            MatchesDataGrid.IsVisible = false;
+            UpdateTableViewTabVisibility(false);
             UpdateStatisticsTabVisibility(true);
             return;
         }
@@ -114,7 +125,7 @@ public partial class MainWindow : Window
 
     private void TableMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        MatchesDataGrid.IsVisible = true;
+        UpdateTableViewTabVisibility(true);
         UpdateStatisticsTabVisibility(false);
     }
 
@@ -122,6 +133,12 @@ public partial class MainWindow : Window
     {
         StatisticsGrid.IsVisible = isVisible;
         StatisticsPlot.IsVisible = isVisible;
+    }
+
+    private void UpdateTableViewTabVisibility(bool isVisible)
+    {
+        MatchesDataGrid.IsVisible = isVisible;
+        StatusLabel.IsVisible = isVisible;
     }
 }
 
