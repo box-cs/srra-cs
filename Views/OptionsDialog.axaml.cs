@@ -16,9 +16,8 @@ namespace srra
 
         private void SetPlayerName_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var content = PlayerNameTextBox.Text;
-            if (content is not null)
-                SaveConfig("PlayerNames", content);
+            var content = PlayerNameTextBox.Text ?? "";
+            SaveConfig("PlayerNames", content);
         }
 
         private void SetSCREPPathButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -37,9 +36,8 @@ namespace srra
                 Title = $"Select {pathToSet.Replace('_', ' ')}",
             };
             var path = await ofd.ShowAsync(this);
-            if (path != null) {
-                SaveConfig(pathToSet, path);
-            }
+            if (string.IsNullOrEmpty(path)) return;
+            SaveConfig(pathToSet, path);
         }
 
         public static void SaveConfig(string key, string value)
