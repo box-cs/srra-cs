@@ -28,21 +28,21 @@ namespace srra.Starcraft
             TopVsBottom,
 
         };
-        public string FilePath { get; set; }
-        public TimeSpan Duration { get; set; }
+        public string FilePath { get; set; } = string.Empty;
+        public TimeSpan Duration { get; set; } = TimeSpan.Zero;
         public string MatchLength { get => Duration.ToString()[..8]; }
-        public string Host { get; set; }
-        public string Name { get; set; }
-        public string APMString { get; set; }
-        public string OpponentName { get; set; }
-        public string OpponentAPMString { get; set; }
-        public string MatchUp { get; set; }
-        public string Map { get; set; }
-        public string Result { get; set; }
-        public DateTime Date { get; set; }
-        public string MatchType { get; set; }
-        public GameType MatchTypeId { get; set; }
-        public int WinnerTeam { get; set; }
+        public string Host { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string APMString { get; set; } = string.Empty;
+        public string OpponentName { get; set; } = string.Empty;
+        public string OpponentAPMString { get; set; } = string.Empty;
+        public string MatchUp { get; set; } = string.Empty;
+        public string Map { get; set; } = string.Empty;
+        public string Result { get; set; } = string.Empty;
+        public DateTime Date { get; set; } = DateTime.UnixEpoch;
+        public string MatchType { get; set; } = string.Empty;
+        public GameType MatchTypeId { get; set; } = GameType.Unkown;
+        public int WinnerTeam { get; set; } = 0;
         public List<Player> Players = new();
         public JObject? MatchDictionary;
 
