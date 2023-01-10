@@ -30,26 +30,21 @@ namespace srra.Starcraft
         };
         public string FilePath { get; set; }
         public TimeSpan Duration { get; set; }
-        public string? MatchLength { get => Duration.ToString()[..8]; }
-        public string? Host { get; set; }
-        public string? Name { get; set; }
-        public string? APMString { get; set; }
-        public string? OpponentName { get; set; }
-        public string? OpponentAPMString { get; set; }
-        public string? MatchUp { get; set; }
-        public string? Map { get; set; }
-        public string? Result { get; set; }
-        public DateTime? Date { get; set; }
-        public string? MatchType { get; set; }
+        public string MatchLength { get => Duration.ToString()[..8]; }
+        public string Host { get; set; }
+        public string Name { get; set; }
+        public string APMString { get; set; }
+        public string OpponentName { get; set; }
+        public string OpponentAPMString { get; set; }
+        public string MatchUp { get; set; }
+        public string Map { get; set; }
+        public string Result { get; set; }
+        public DateTime Date { get; set; }
+        public string MatchType { get; set; }
         public GameType MatchTypeId { get; set; }
-        public int? WinnerTeam { get; set; }
+        public int WinnerTeam { get; set; }
         public List<Player> Players = new();
         public JObject? MatchDictionary;
-
-        public Match(string filePath)
-        {
-            FilePath = filePath;
-        }
 
         public override string ToString() => $"{FilePath}";
 

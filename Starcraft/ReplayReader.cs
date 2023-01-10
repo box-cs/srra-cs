@@ -36,7 +36,7 @@ public class ReplayReader
                 });
             });
         });
-        replayData.Sort((a, b) => Nullable.Compare(b.Date, a.Date));
+        replayData.Sort((a, b) => DateTime.Compare(b.Date, a.Date));
     }
 
     public Match? ReadReplay(string replayPath)

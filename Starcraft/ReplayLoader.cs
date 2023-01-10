@@ -43,8 +43,8 @@ public class ReplayLoader
         }
 
         // Determining winner
-        int? winnerTeam = MatchDictionary?["Computed"]?["WinnerTeam"]?.Value<int>();
-        players?.ForEach(player => player.DetermineMatchOutcomes(LeaveCommands, winnerTeam ?? 0, Host));
+        int winnerTeam = MatchDictionary?["Computed"]?["WinnerTeam"]?.Value<int>() ?? 0;
+        players?.ForEach(player => player.DetermineMatchOutcomes(LeaveCommands, winnerTeam, Host));
         // Uses player names to assume who is the replay owner
         // As a replay owner, we're able to determine if we've lost (and for 1v1 games, we can also determine winner)
         // This means that for 1v1s our opponents results are the opposite of our loss result
@@ -53,14 +53,15 @@ public class ReplayLoader
 
         var sanitizedMapName = new string(ActualMapName?.ToList()
             .FindAll(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || char.IsPunctuation(c)).ToArray());
-        return new Match(FilePath) {
+        return new Match() {
             // Meta
+            FilePath = FilePath,
             Host = Host,
             Duration = TimeSpan.FromMilliseconds((MatchDictionary?["Header"]?["Frames"]?.Value<int>() ?? 0) * 42),
-            Date = MatchDictionary?["Header"]?["StartTime"]?.Value<DateTime>(),
+            Date = MatchDictionary?["Header"]?["StartTime"]?.Value<DateTime>() ?? DateTime.UnixEpoch,
             // Map Data
             Map = sanitizedMapName,
-            MatchType = MatchDictionary?["Header"]?["Type"]?["Name"]?.Value<string>(),
+            MatchType = MatchDictionary?["Header"]?["Type"]?["Name"]?.Value<string>() ?? "Unknown",
             MatchTypeId = ((GameType)GameTypeId),
             WinnerTeam = winnerTeam,
             // Player Data
