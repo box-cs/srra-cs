@@ -43,7 +43,7 @@ public class ReplayReader
     {
         var data = ReadFromSCREP(replayPath);
         if (string.IsNullOrEmpty(data)) return null;
-        return new Match(data, replayPath);
+        return (new ReplayLoader(data, replayPath)).ToMatch();
     }
 
     private string? ReadFromSCREP(string replayPath)
