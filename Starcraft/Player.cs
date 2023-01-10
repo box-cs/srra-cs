@@ -42,7 +42,7 @@ namespace srra.Starcraft
 
                 // We cannot determine the winner
                 if (leaveCommands is null) {
-                    if (Name == ConfigurationManager.AppSettings["PlayerName"])
+                    if ((ConfigurationManager.AppSettings["PlayerNames"] ?? "").Split(',').Contains(Name))
                         HasWonMatch = null;
                     return;
                 }
