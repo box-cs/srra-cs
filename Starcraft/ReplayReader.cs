@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Threading;
 using System.Linq;
 using System.IO;
 using System.Configuration;
@@ -12,19 +11,22 @@ namespace srra.Starcraft;
 public class ReplayReader
 {
     public List<Match> replayData = new();
-    public List<Thread> processingThreads = new();
     public List<string> ReplayPaths = new();
-    public static readonly string? ScrepPath = ConfigurationManager.AppSettings["SCREP_Path"];
+    public static string? ScrepPath { get => ConfigurationManager.AppSettings["SCREP_Path"]; }
+    public static string? ReplayPath { get => ConfigurationManager.AppSettings["Replay_Path"]; }
 
     public ReplayReader() { }
 
     public async Task ReadReplaysTask()
     {
+        // BUG: Occasionally it misses a file or two
         replayData.Clear();
         await Task.Run(() => {
             const int MAX_NUMBER_OF_THREADS = 12;
             var paths = ReplayPaths;
-            var chunkedPaths = paths.Chunk(paths.Count > MAX_NUMBER_OF_THREADS ? paths.Count / MAX_NUMBER_OF_THREADS : paths.Count);
+            if (paths.Count() == 0) return;
+            var chunkSize = paths.Count > MAX_NUMBER_OF_THREADS ? (paths.Count / MAX_NUMBER_OF_THREADS) : paths.Count;
+            var chunkedPaths = paths.Chunk(chunkSize);
             Parallel.For(0, chunkedPaths.Count(), (count, state) => {
                 chunkedPaths.ToList()[count].ToList().ForEach(path => {
                     var match = ReadReplay(path);
@@ -46,10 +48,8 @@ public class ReplayReader
 
     private string? ReadFromSCREP(string replayPath)
     {
-        using var proc = new Process()
-        {
-            StartInfo = new ProcessStartInfo()
-            {
+        using var proc = new Process() {
+            StartInfo = new ProcessStartInfo() {
                 UseShellExecute = false,
                 FileName = $"{ScrepPath}\\screp.exe",
                 CreateNoWindow = true,
@@ -59,16 +59,15 @@ public class ReplayReader
         };
         proc.Start();
         var data = proc.StandardOutput.ReadToEnd();
-        return proc.ExitCode == 0 ? data : null;
+        return (proc.ExitCode == 0) ? data : null;
     }
 
     public void SetReplayPaths()
     {
-        var replayPath = ConfigurationManager.AppSettings["Replay_Path"];
+        if (string.IsNullOrEmpty(ReplayPath)) return;
 
-        if (string.IsNullOrEmpty(replayPath)) return;
-        var matches = Directory.GetFiles(replayPath, "*.rep", SearchOption.AllDirectories).ToList();
-        matches.Reverse();
-        ReplayPaths = new List<string>(matches);
+        var matches = Directory.EnumerateFiles(ReplayPath, "*.rep", SearchOption.AllDirectories)
+            .Where(path=>path.EndsWith(".rep"));
+        ReplayPaths = new List<string>(matches.Reverse());
     }
 }
