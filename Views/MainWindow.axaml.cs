@@ -42,9 +42,9 @@ public partial class MainWindow : Window
 
         replayReader.SetReplayPaths();
         await replayReader.ReadReplaysTask();
-        _analyzer.AnalyzeReplays(replayReader.replayData);
+        _analyzer.AnalyzeReplays(new (replayReader.replayData));
 
-        _mainWindowViewModel.Matches.AddRange(replayReader.replayData);
+        _mainWindowViewModel.Matches.AddRange(replayReader.replayData.Select(x => x));
         _mainWindowViewModel.SimpleWinRates.AddRange(_analyzer.WinRates.ToSimpleWinRates());
         _analyzer.UpdateGraphData();
         _analyzer.IsDoneAnalyzing = true;
@@ -70,7 +70,7 @@ public partial class MainWindow : Window
     public void FilterMatches()
     {
         _mainWindowViewModel.Matches.Clear();
-        var filteredMatches = new MatchFilterBuilder(replayReader.replayData)
+        var filteredMatches = new MatchFilterBuilder(replayReader.replayData.Select(x => x))
             .WithName(PlayerNameFilterTextBox?.Text)
             .WithMap(MapNameFilterTextBox?.Text)
             .WithMatchUp(MatchUpFilterComboBox?.SelectedItem?.ToString())
