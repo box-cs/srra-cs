@@ -15,7 +15,6 @@ public class ReplayReader
     public List<string> ReplayPaths = new();
     public static string? ScrepPath { get => ConfigurationManager.AppSettings["SCREP_Path"]; }
     public static string? ReplayPath { get => ConfigurationManager.AppSettings["Replay_Path"]; }
-    public static int MatchCount = 0;
 
     public ReplayReader() { }
 
