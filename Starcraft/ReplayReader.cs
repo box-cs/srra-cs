@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
 using System.Configuration;
+using System.Collections.Concurrent;
 
 namespace srra.Starcraft;
 
@@ -14,39 +15,37 @@ public class ReplayReader
     public List<string> ReplayPaths = new();
     public static string? ScrepPath { get => ConfigurationManager.AppSettings["SCREP_Path"]; }
     public static string? ReplayPath { get => ConfigurationManager.AppSettings["Replay_Path"]; }
+    public static int MatchCount = 0;
 
     public ReplayReader() { }
 
     public async Task ReadReplaysTask()
     {
         // BUG: Occasionally it misses a file or two
-        replayData.Clear();
-        await Task.Run(() => {
-            const int MAX_NUMBER_OF_THREADS = 12;
-            var paths = ReplayPaths;
-            if (paths.Count() == 0) return;
-            var chunkSize = paths.Count > MAX_NUMBER_OF_THREADS ? (paths.Count / MAX_NUMBER_OF_THREADS) : paths.Count;
-            var chunkedPaths = paths.Chunk(chunkSize);
-            Parallel.For(0, chunkedPaths.Count(), (count, state) => {
-                chunkedPaths.ToList()[count].ToList().ForEach(path => {
-                    var match = ReadReplay(path);
-                    if (match != null) {
-                        replayData.Add(match);
-                    }
-                });
+        var paths = ReplayPaths;
+        if (paths.Count == 0) return;
+        var matches = await Task.Run(() => {
+            var data = new ConcurrentQueue<Match>();
+            var parallelOptions = new ParallelOptions {
+                MaxDegreeOfParallelism = Convert.ToInt32(Math.Ceiling((Environment.ProcessorCount * 0.75) * 2.0))
+            };
+
+            Parallel.ForEach(paths, parallelOptions, path => {
+                data.Enqueue(ReadReplay(path));
             });
+            return data.ToList();
         });
+        replayData = new(matches);
         replayData.Sort((a, b) => DateTime.Compare(b.Date, a.Date));
     }
 
-    public Match? ReadReplay(string replayPath)
+    public Match ReadReplay(string replayPath)
     {
         var data = ReadFromSCREP(replayPath);
-        if (string.IsNullOrEmpty(data)) return null;
         return (new ReplayLoader(data, replayPath)).ToMatch();
     }
 
-    private string? ReadFromSCREP(string replayPath)
+    private string ReadFromSCREP(string replayPath)
     {
         using var proc = new Process() {
             StartInfo = new ProcessStartInfo() {
@@ -59,7 +58,7 @@ public class ReplayReader
         };
         proc.Start();
         var data = proc.StandardOutput.ReadToEnd();
-        return (proc.ExitCode == 0) ? data : null;
+        return (proc.ExitCode == 0) ? data : "";
     }
 
     public void SetReplayPaths()
