@@ -70,33 +70,14 @@ public partial class MainWindow : Window
     public void FilterMatches()
     {
         _mainWindowViewModel.Matches.Clear();
-        var filteredMatches = replayReader.replayData;
-        // Apply Player Name Filter
-        var playerNameFilter = PlayerNameFilterTextBox?.Text;
-        if (!string.IsNullOrEmpty(playerNameFilter))
-            filteredMatches = filteredMatches.Where(match =>
-            match.Players.Any(player => player?.Name is not null && player.Name.ToLower().Contains(playerNameFilter.ToLower())))
-                .ToList();
-
-        // Apply Map Name Filter
-        var mapNameFilter = MapNameFilterTextBox?.Text;
-        if (!string.IsNullOrEmpty(mapNameFilter))
-            filteredMatches = filteredMatches.Where(match => match.Map.ToLower().Contains(mapNameFilter.ToLower()))
-                .ToList();
-
-        // Apply Match Type Filter
-        if (Enum.TryParse<GameType>(GameTypeFilterComboBox?.SelectedItem?.ToString(), out var gameTypeFilter))
-            filteredMatches = filteredMatches.Where(match => match.MatchTypeId == gameTypeFilter)
-                .ToList();
-
-        // Apply Match Up Filter
-        var matchUp = MatchUpFilterComboBox.SelectedItem?.ToString();
-        if (matchUp != "Any")
-            filteredMatches = filteredMatches.Where(match => match.MatchUp == matchUp || new string(match.MatchUp.Reverse().ToArray()) == matchUp)
-                .ToList();
-
-        StatusLabel.Content = $"Found {filteredMatches.Count} replays!";
+        var filteredMatches = new MatchFilterBuilder(replayReader.replayData)
+            .WithName(PlayerNameFilterTextBox?.Text)
+            .WithMap(MapNameFilterTextBox?.Text)
+            .WithMatchUp(MatchUpFilterComboBox?.SelectedItem?.ToString())
+            .WithGameType(GameTypeFilterComboBox?.SelectedItem?.ToString())
+            .Build();
         _mainWindowViewModel.Matches.AddRange(filteredMatches);
+        StatusLabel.Content = $"Found {filteredMatches.Count()} replays!";
     }
 
     private void AddFilterOptions()
