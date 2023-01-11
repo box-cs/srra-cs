@@ -15,6 +15,7 @@
 			Height="{Binding #SRRAWindow.Bounds.Height}"
 			RowDefinitions="40,*,40" 
 			>
+			<!-- Menu -->
 			<Rectangle Fill="LightBlue" Grid.Row="0"></Rectangle>
 			<DockPanel Grid.Row="0">
 				<Menu DockPanel.Dock="Top">
@@ -31,7 +32,12 @@
 				</Menu>
 			</DockPanel>
 			<!-- Table-->
-			<DataGrid
+			<Grid 
+				Name="MatchesGrid" 
+				Grid.Row="1"
+				RowDefinitions="*, Auto"
+				>
+				<DataGrid
 				Name="MatchesDataGrid"
 				Items="{Binding Matches}"
 				RowBackground="LightBlue"
@@ -40,44 +46,83 @@
 				CanUserResizeColumns="True"
 				IsReadOnly="True"
 				IsVisible="True"
-				Grid.Row="1"
+				Grid.Row="0"
 				SelectionMode="Extended"
 				>
-				<DataGrid.Styles>
-					<Style Selector="DataGridColumnHeader">
-						<Setter Property="HorizontalContentAlignment" Value="Center"/>
-						<Setter Property="AreSeparatorsVisible" Value="False" />
-					</Style>
-					<Style Selector="DataGridCell">
-						<Setter Property="HorizontalContentAlignment" Value="Center"/>
-					</Style>
-				</DataGrid.Styles>
-				<DataGrid.ContextMenu>
-					<ContextMenu>
-						<MenuItem
-							Name="ViewReplayDetailsMenuItem"
-							Header="View Replay Details"/>
-						<MenuItem
-							Name="OpenFolderLocationMenuItem"
-							Header="Open Folder Location"/>
-						<MenuItem
-							Name="DeleteFileMenuItem"
-							Header="Delete File"/>
-					</ContextMenu>
-				</DataGrid.ContextMenu>
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="Name"     MinWidth="120" Width="*" Binding="{Binding Name}"/>
-					<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding APMString}" />
-					<DataGridTextColumn Header="Opponent" MinWidth="120" Width="*" Binding="{Binding OpponentName}" />
-					<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding OpponentAPMString}" />
-					<DataGridTextColumn Header="MatchUp"  MinWidth="120" Width="120" Binding="{Binding MatchUp}" />
-					<DataGridTextColumn Header="Winner"   MinWidth="120" Width="120" Binding="{Binding WinnerTeam}" />
-					<DataGridTextColumn Header="Map"      MinWidth="120" Width="*" Binding="{Binding Map}" />
-					<DataGridTextColumn Header="Type"     MinWidth="120" Width="*" Binding="{Binding MatchType}" />
-					<DataGridTextColumn Header="Length"   MinWidth="120" Width="120" Binding="{Binding MatchLength}" />
-					<DataGridTextColumn Header="Date"     MinWidth="120" Width="*" Binding="{Binding Date}" />
-				</DataGrid.Columns>
-			</DataGrid>
+					<DataGrid.Styles>
+						<Style Selector="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment" Value="Center"/>
+							<Setter Property="AreSeparatorsVisible" Value="False" />
+						</Style>
+						<Style Selector="DataGridCell">
+							<Setter Property="HorizontalContentAlignment" Value="Center"/>
+						</Style>
+					</DataGrid.Styles>
+					<DataGrid.ContextMenu>
+						<ContextMenu>
+							<MenuItem
+								Name="ViewReplayDetailsMenuItem"
+								Header="View Replay Details"/>
+							<MenuItem
+								Name="OpenFolderLocationMenuItem"
+								Header="Open Folder Location"/>
+							<MenuItem
+								Name="DeleteFileMenuItem"
+								Header="Delete File"/>
+						</ContextMenu>
+					</DataGrid.ContextMenu>
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Name"     MinWidth="120" Width="*" Binding="{Binding Name}"/>
+						<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding APMString}" />
+						<DataGridTextColumn Header="Opponent" MinWidth="120" Width="*" Binding="{Binding OpponentName}" />
+						<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding OpponentAPMString}" />
+						<DataGridTextColumn Header="MatchUp"  MinWidth="120" Width="120" Binding="{Binding MatchUp}" />
+						<DataGridTextColumn Header="Winner"   MinWidth="120" Width="120" Binding="{Binding WinnerTeam}" />
+						<DataGridTextColumn Header="Map"      MinWidth="120" Width="*" Binding="{Binding Map}" />
+						<DataGridTextColumn Header="Type"     MinWidth="120" Width="*" Binding="{Binding MatchType}" />
+						<DataGridTextColumn Header="Length"   MinWidth="120" Width="120" Binding="{Binding MatchLength}" />
+						<DataGridTextColumn Header="Date"     MinWidth="120" Width="*" Binding="{Binding Date}" />
+					</DataGrid.Columns>
+				</DataGrid>
+				<!-- Filters -->
+				<StackPanel 
+					Grid.Row="1" 
+					Orientation="Horizontal" 
+					Margin="10"
+					Spacing="20"
+					HorizontalAlignment="Center"
+					Name="FilterStackPanel"
+					>
+					<TextBlock
+						Grid.Row="1" VerticalAlignment="Center">
+						Player Name:
+					</TextBlock>
+					<TextBox Name="PlayerNameFilterTextBox" MaxLength="30" MinWidth="100" />
+					<TextBlock
+						Grid.Row="1" VerticalAlignment="Center">
+						Map Name:
+					</TextBlock>
+					<TextBox Name="MapNameFilterTextBox" MaxLength="30" MinWidth="100" />
+					<TextBlock
+						Grid.Row="1" VerticalAlignment="Center">
+						Game Type: 
+					</TextBlock>
+					<ComboBox
+						Name="GameTypeFilterComboBox"
+						Grid.Row="1"
+						SelectedIndex="0">
+					</ComboBox>
+					<TextBlock
+						Grid.Row="1" VerticalAlignment="Center">
+						Match Up:
+					</TextBlock>
+					<ComboBox
+						Name="MatchUpFilterComboBox"
+						Grid.Row="1"
+						SelectedIndex="0">
+					</ComboBox>
+				</StackPanel>
+			</Grid>
 			<!-- Statistics -->
 			<Grid
 				Name="StatisticsGrid"
@@ -143,6 +188,7 @@
 					Grid.Column="1"
 					/>
 			</Grid>
+			<!-- Footer -->
 			<Rectangle Fill="LightBlue" Grid.Row="3"></Rectangle>
 			<Label
 				Grid.Row="3"
