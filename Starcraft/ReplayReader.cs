@@ -21,7 +21,6 @@ public class ReplayReader
 
     public async Task ReadReplaysTask()
     {
-        // BUG: Occasionally it misses a file or two
         var paths = ReplayPaths;
         if (paths.Count == 0) return;
         var matches = await Task.Run(() => {
