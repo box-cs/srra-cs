@@ -5,7 +5,7 @@
 		xmlns:ScottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="srra.MainWindow"
-        Title="SRRA"
+        Title="Starcraft Replay Analyzer"
 		Width="1600"
 		Height="620"
 		Name="SRRAWindow"
@@ -53,8 +53,11 @@
 						<Style Selector="DataGridColumnHeader">
 							<Setter Property="HorizontalContentAlignment" Value="Center"/>
 							<Setter Property="AreSeparatorsVisible" Value="False" />
+							<Setter Property="FontFamily" Value="Assets/NotoMono-Regular.ttf" />
+							<Setter Property="FontWeight" Value="SemiBold" />
 						</Style>
 						<Style Selector="DataGridCell">
+							<Setter Property="FontFamily" Value="Assets/NotoMono-Regular.ttf" />
 							<Setter Property="HorizontalContentAlignment" Value="Center"/>
 						</Style>
 					</DataGrid.Styles>
@@ -72,16 +75,16 @@
 						</ContextMenu>
 					</DataGrid.ContextMenu>
 					<DataGrid.Columns>
-						<DataGridTextColumn Header="Name"     MinWidth="120" Width="*" Binding="{Binding Name}"/>
-						<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding APMString}" />
-						<DataGridTextColumn Header="Opponent" MinWidth="120" Width="*" Binding="{Binding OpponentName}" />
-						<DataGridTextColumn Header="APM/EAPM" MinWidth="120" Width="120" Binding="{Binding OpponentAPMString}" />
-						<DataGridTextColumn Header="MatchUp"  MinWidth="120" Width="120" Binding="{Binding MatchUp}" />
-						<DataGridTextColumn Header="Winner"   MinWidth="120" Width="120" Binding="{Binding WinnerTeam}" />
-						<DataGridTextColumn Header="Map"      MinWidth="120" Width="*" Binding="{Binding Map}" />
-						<DataGridTextColumn Header="Type"     MinWidth="120" Width="*" Binding="{Binding MatchType}" />
-						<DataGridTextColumn Header="Length"   MinWidth="120" Width="120" Binding="{Binding MatchLength}" />
-						<DataGridTextColumn Header="Date"     MinWidth="120" Width="*" Binding="{Binding Date}" />
+						<DataGridTextColumn Header="Name"     Width="*"    Binding="{Binding Name}"          MinWidth="120"/>
+						<DataGridTextColumn Header="APM/EAPM" Width="Auto" Binding="{Binding APMString}"                   />
+						<DataGridTextColumn Header="Opponent" Width="*"    Binding="{Binding OpponentName}"  MinWidth="120"/>
+						<DataGridTextColumn Header="APM/EAPM" Width="Auto" Binding="{Binding OpponentAPMString}"           />
+						<DataGridTextColumn Header="MatchUp"  Width="Auto" Binding="{Binding MatchUp}"                     />
+						<DataGridTextColumn Header="Map"      Width="*"    Binding="{Binding Map}"           MinWidth="120"/>
+						<DataGridTextColumn Header="Winner"   Width="Auto" Binding="{Binding WinnerTeam}"                  />
+						<DataGridTextColumn Header="Type"     Width="*"    Binding="{Binding MatchType}"     MinWidth="120"/>
+						<DataGridTextColumn Header="Length"   Width="Auto" Binding="{Binding MatchLength}"                 />
+						<DataGridTextColumn Header="Date"     Width="*"    Binding="{Binding Date}"          MinWidth="120"/>
 					</DataGrid.Columns>
 				</DataGrid>
 				<!-- Filters -->
@@ -168,9 +171,12 @@
 					<DataGrid.Styles>
 						<Style Selector="DataGridColumnHeader">
 							<Setter Property="HorizontalContentAlignment" Value="Center"/>
+							<Setter Property="FontWeight" Value="SemiBold" />
 							<Setter Property="AreSeparatorsVisible" Value="False" />
+							<Setter Property="FontFamily" Value="Assets/NotoMono-Regular.ttf" />
 						</Style>
 						<Style Selector="DataGridCell">
+							<Setter Property="FontFamily" Value="Assets/NotoMono-Regular.ttf" />
 							<Setter Property="HorizontalContentAlignment" Value="Center"/>
 						</Style>
 					</DataGrid.Styles>
