@@ -20,6 +20,7 @@ public class ReplayReader
 
     public async Task ReadReplaysTask()
     {
+        if (string.IsNullOrEmpty(ScrepPath) || !File.Exists($"{ScrepPath}\\screp.exe")) return;
         var paths = ReplayPaths;
         if (paths.Count == 0) return;
         var matches = await Task.Run(() => {
