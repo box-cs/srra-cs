@@ -87,7 +87,7 @@ public partial class MainWindow : Window
                 type => ((GameType)type).ToString()
             ));
         GameTypeFilterComboBox.Items = gameTypeFilterOptions;
-        MatchUpFilterComboBox.Items = new List<string>() { "Any", "TvZ", "TvP", "TvT", "PvZ", "PvP", "PvT", "ZvZ", "ZvP", "ZvT" };
+        MatchUpFilterComboBox.Items = new List<string>() { "Any", "TvZ", "TvT", "PvT", "PvP", "ZvP", "ZvZ" };
         GameTypeFilterComboBox.SelectedIndex = 0;
         MatchUpFilterComboBox.SelectedIndex = 0;
     }
